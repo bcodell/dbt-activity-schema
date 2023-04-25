@@ -1,0 +1,5 @@
+activity_id,customer_id,signed_up_at,first_before_referrer_url,second_pageview_at
+5a5e6cf0133a3faa73356ff291e26471,1,2022-01-02 22:10:11,'bing.com',2022-01-04 22:10:11
+574b51c586b446456ac8da4b504b4d27,4,2022-01-05 22:10:11,'yahoo.com',2022-01-07 22:10:11
+f77c4be94da1197fb6e8864f59b85dd2,7,2022-01-08 22:10:11,'gmail.com',2022-01-10 22:10:11
+22ef1cea8e5cb3dc154fd727b1776a6e,10,2022-01-11 22:10:11,'google.com',2022-01-13 22:10:11
