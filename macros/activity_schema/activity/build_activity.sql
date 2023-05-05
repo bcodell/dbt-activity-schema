@@ -23,19 +23,8 @@ Accepted values are one of {{accepted_values_str}}, but received '{{nc}}'
 {%- endfor -%}
 
 {% if execute %}
+    {%- set data_types = config.get("data_types", none) -%}
     {%- set stream = config.require("stream") -%}
-    {%- set data_types = config.get("data_types") -%}
-    {# confirm that model is defined as a dependency on the activity stream #}
-    {%- set project_name = model['unique_id'].split('.')[1] -%}
-    {%- set activity_stream_key = 'model.' ~ project_name ~ '.' ~ stream -%}
-    {%- set activity_stream_node = graph.nodes.get(activity_stream_key) -%}
-    {%- set activity_stream_deps = activity_stream_node['depends_on']['nodes'] -%}
-    {%- if model['unique_id'] not in activity_stream_deps -%}
-      {%- set error_message -%}
-        Model '{{ model.unique_id }}' is not properly assigned as a dependency for activity stream '{{stream}}'.
-      {%- endset -%}
-      {{ exceptions.raise_compiler_error(error_message) }}
-    {%- endif -%}
 {% else %}
     {%- set stream = "stream" -%}
     {%- set data_types = none -%}
