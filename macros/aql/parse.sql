@@ -72,7 +72,7 @@ Expected {{keyword_str}}, got '{{parsed_word}}'
 
 {% macro _parse_stream(query) %}
 {%- set stream = modules.re.split(dbt_aql.whitespace(), query)[0] %}
-{%- set streams = var("dbt_aql", {}).keys() -%}
+{%- set streams = var("dbt_aql", {}).get("streams", {}).keys() -%}
 {%- if stream not in streams -%}
     {%- set error_message -%}
 Error: aql query in model '{{ model.unique_id }}' specifies unconfigured stream '{{stream}}'.

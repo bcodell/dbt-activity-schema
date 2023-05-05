@@ -27,10 +27,11 @@ vars:
         - link
       column_aliases:
         feature_json: attributes
-    customer_stream:
-      customer_id_alias: entity_uuid
-      anonymous_customer_id_alias: anonymous_entity_uuid
-      model_prefix: customer__
+    streams:
+      customer_stream:
+        customer_id_alias: entity_uuid
+        anonymous_customer_id_alias: anonymous_entity_uuid
+        model_prefix: customer__
   dbt_activity_schema:
     included_columns:
       - activity_id

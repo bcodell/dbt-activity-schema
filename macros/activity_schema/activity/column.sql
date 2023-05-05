@@ -8,8 +8,8 @@
 
 {%- set project_name = model['unique_id'].split(".")[1] -%}
 {%- if execute -%}
-    {%- set model_prefix = var("dbt_aql").get(stream, {}).get("model_prefix", "") -%}
-    {%- set activity_node_config = graph.nodes.get("model."~project_name~"."~model_prefix~activity_name, {}).get("config", {}) -%}
+    {%- set model_prefix = var("dbt_aql").get("streams").get(stream, {}).get("model_prefix", "") -%}
+    {%- set activity_node_config = graph.get("nodes", {}).get("model."~project_name~"."~model_prefix~activity_name, {}).get("config", {}) -%}
     {%- set data_type = activity_node_config.get("data_types", {}).get(column_name, dbt.type_string()) -%}
 {%- else -%}
 {%- set data_type = dbt.type_string() -%}

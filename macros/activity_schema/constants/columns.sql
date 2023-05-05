@@ -1,6 +1,6 @@
 {% macro customer_column(stream) %}
 {% if execute %}
-    {%- set customer_alias = var("dbt_aql").get(stream).get("customer_id_alias", none) -%}
+    {%- set customer_alias = var("dbt_aql").get("streams").get(stream).get("customer_id_alias", none) -%}
     {%- if customer_alias is none -%}
         {%- set error_message -%}
     Configuration for stream '{{stream}}' does not include required alias for customer ID column.
@@ -17,7 +17,7 @@
 
 
 {% macro anonymous_customer_column(stream) %}
-{%- do return(var("dbt_aql").get(stream, {}).get("anonymous_customer_id_alias", none)) -%}
+{%- do return(var("dbt_aql").get("streams").get(stream, {}).get("anonymous_customer_id_alias", none)) -%}
 {% endmacro %}
 
 
