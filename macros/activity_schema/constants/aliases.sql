@@ -44,7 +44,7 @@
 
 {% macro default__clean_activity_name(stream, activity_name) %}
 {%- if execute -%}
-    {%- set model_prefix = var("dbt_aql").get(stream, {}).get("model_prefix", "") -%}
+    {%- set model_prefix = var("dbt_aql").get("streams").get(stream, {}).get("model_prefix", "") -%}
 {%- else -%}
     {%- set model_prefix = "__" -%}
 {%- endif -%}
