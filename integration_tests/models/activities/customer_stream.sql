@@ -1,4 +1,4 @@
-{{ config(options=dbt_aql.cluster_keys()) }}
+{{ config(options={"partition_by": dbt_aql.cluster_keys()}) }}
 
 {% set activity_list = [
     ref('customer__bought_something'),
