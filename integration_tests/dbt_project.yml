@@ -16,7 +16,7 @@ target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
 models:
-  +materialized: external
+  +materialized: "{{ env_var('DBT_MATERIALIZATION', 'table') }}"
   +format: csv
 
 vars:
@@ -32,13 +32,9 @@ vars:
         customer_id_alias: entity_uuid
         anonymous_customer_id_alias: anonymous_entity_uuid
         model_prefix: customer__
-  dbt_activity_schema:
-    included_columns:
-      - activity_id
-      - entity_uuid
-      - ts
-      - revenue_impact
-    column_mappings:
-      customer: entity_uuid
-      anonymous_customer_id: anonymous_entity_uuid
 
+seeds:
+  dbt_aql_integration_tests:
+    datasets:
+      +column_types:
+        customer_id: text
