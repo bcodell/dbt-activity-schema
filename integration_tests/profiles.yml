@@ -17,7 +17,7 @@ integration_tests:
       port: 5432
       user: ""
       pass: ""
-      dbname: ashby
-      schema: activity_schema_demo
+      dbname: dbt_aql_integration_tests
+      schema: main
 
   target: duckdb
