@@ -3,13 +3,12 @@
 {% endmacro %}
 
 {% macro default__aggfunc_last_value(column) %}
-{%- set primary = dbt_aql.primary() -%}
-{%- set req = dbt_aql._required_prefix() -%}
+{%- set joined = dbt_aql.joined() -%}
 {%- set ts = dbt_aql.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
 cast(split_part(
             max(
-                cast({{primary}}.{{req}}{{ts}} as {{dbt.type_string()}})
+                cast({{joined}}.{{ts}} as {{dbt.type_string()}})
                 || {{dbt.string_literal(delimiter)}}
                 || cast({{ column.column_sql }} as {{dbt.type_string()}})
             ),
@@ -19,16 +18,21 @@ cast(split_part(
 {%- endmacro -%}
 
 {% macro duckdb__aggfunc_last_value(column) %}
-{%- set primary = dbt_aql.primary() -%}
-{%- set req = dbt_aql._required_prefix() -%}
+{%- set joined = dbt_aql.joined() -%}
 {%- set ts = dbt_aql.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
 cast(string_split(
             max(
-                cast({{primary}}.{{req}}{{ts}} as {{dbt.type_string()}})
+                cast({{joined}}.{{ts}} as {{dbt.type_string()}})
                 || {{dbt.string_literal(delimiter)}}
                 || cast({{ column.column_sql }} as {{dbt.type_string()}})
             ),
             {{dbt.string_literal(delimiter)}}
         )[2] as {{column.data_type}})
 {%- endmacro -%}
+
+{% macro snowflake__aggfunc_last_value(column) %}
+{%- set joined = dbt_aql.joined() -%}
+{%- set ts = dbt_aql.schema_columns().ts -%}
+max_by({{column.column_sql}}, {{joined}}.{{ts}})
+{% endmacro %}
