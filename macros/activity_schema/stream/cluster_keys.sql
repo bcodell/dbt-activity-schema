@@ -58,5 +58,5 @@
     columns.activity_repeated_at~" is null",
     "to_date("~columns.ts~")"
 ] -%}
-{%- do return({"partition_by": cluster_cols|join(", ")}) -%}
+{%- do return(cluster_cols|join(", ")) -%}
 {% endmacro %}
