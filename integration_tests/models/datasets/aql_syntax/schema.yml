@@ -1,0 +1,9 @@
+version: 2
+
+models:
+
+  - name: dataset__filtered
+    description: A test to validate the functionality of filter clauses in aql.
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref("output__filtered")

@@ -1,14 +1,14 @@
-{% macro alias_activity(activity) %}
+{% macro alias_activity(activity, ix) %}
 {%- set av = dbt_aql._activity_verbs() -%}
 {%- if activity.verb == av.select -%}
     {%- set prefix = "primary" -%}
-    {%- set attributes = [prefix, activity.relationship_selector, activity.activity_name, activity.nth] -%}
+    {%- set attributes = [prefix, activity.relationship_selector, activity.activity_name, activity.nth, ix] -%}
 {%- else -%}
     {%- set prefix = "joined" -%}
     {%- if activity.verb == av.append -%}
-        {%- set attributes = [prefix, activity.verb, activity.relationship_selector, activity.join_condition, activity.activity_name, activity.nth] -%}
+        {%- set attributes = [prefix, activity.verb, activity.relationship_selector, activity.join_condition, activity.activity_name, activity.nth, ix] -%}
     {%- elif activity.verb == av.aggregate -%}
-        {%- set attributes = [prefix, activity.verb, activity.join_condition, activity.activity_name] -%}
+        {%- set attributes = [prefix, activity.verb, activity.join_condition, activity.activity_name, ix] -%}
     {%- endif -%}
 {%- endif -%}
 
@@ -56,6 +56,10 @@
 
 {% macro _required_prefix() %}
 {%- do return("req__") -%}
+{% endmacro %}
+
+{% macro _filtered_suffix() %}
+{%- do return("__filtered") -%}
 {% endmacro %}
 
 {% macro get_model_prefix(stream) %}
