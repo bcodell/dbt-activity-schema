@@ -5,7 +5,8 @@
     select="select",
     append="append",
     aggregate="aggregate",
-    verb_list=["select", "append", "aggregate"]
+    include="include",
+    verb_list=["select", "append", "aggregate", "include"]
 )) -%}
 
 {% endmacro %}

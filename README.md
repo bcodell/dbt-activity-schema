@@ -441,15 +441,41 @@ append first after activity_2 (
 Add within the column specification for the Joined Activity. Supports f-string functionality for the following keywords:
 * `joined` - will alias to the appropriate CTE alias for the Joined Activity when the aql is transpiled into SQL
 * `primary` - will alias to the appropriate CTE alias for the Primary Activity when the aql is transpiled into SQL
-* All of the default column names from the Activity Schema spec will be transformed to their appropriate aliases as defined in the project configuration
+* All of the default column names from the Activity Schema spec will be transformed to their appropriate aliases as defined in the project configuration (or the alias can be explicitly stated)
 
-> **Note: Any column included with the Primary Activity will be available to be used in the extra join criteria for a Joined Activity. It can be referenced via its alias and does not need to be referenced via f-string syntax (see syntax second in second joined activity from example code above for reference).**
+> **Note: Any column included with the Primary Activity will be available to be used in the extra join criteria for a Joined Activity. It can be referenced via its alias and does not need to be referenced via f-string syntax (see syntax in second joined activity from example code above for reference).**
 
 </br>
 
 > ⚠️ **WARNING: Do not use `{primary}` for custom logic for Joined Activities using the `aggregate` join method and the `all` join clause. For performance purposes, these Joined Activities are not actually joined back to the Primary Activity when deriving their aggregated columns, so there will be no `{primary}` CTE to join to, and a SQL error will be thrown.**
 
 </br>
+## **Defining Canonical Dataset Columns**
+Since some columns from joined activities will represent canonical definitions for certain business values or metrics (e.g. `ts` from `append first ever created_account` is the agreed-upon business definition of when an account became active), it's important to have a means to persist that definition and reference it by its namespaced value. That is done in two steps - the `dataset_column` custom materialization and the `include` join method in aql. It is implemented as follows:
+
+### `dataset_column` materialization
+```sql
+-- filename customer__total_items_purchased_after.sql
+
+{% set aql %}
+using customer_stream
+aggregate after bought_something (
+    sum(total_items_purchased)
+)
+{% endset %}
+
+{{config(materialized='dataset_column', aql=aql)}}
+
+{{ dbt_aql.dataset_column(aql) }}
+```
+
+### `include` join method
+```sql
+include (
+    total_items_purchased_after -- same as filename of definition, can include or exclude configured stream prefix
+)
+```
+
 
 ## **Adding Custom Aggregation Functions**
 Placeholder. Documentation coming soon.

@@ -1,6 +1,5 @@
-logs/*
-tmp/*
-target/*
-dbt_packages/*
-!.gitkeep
+logs
+tmp
+target
+dbt_packages
 
