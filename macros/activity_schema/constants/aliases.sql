@@ -42,12 +42,9 @@
 {{ return(adapter.dispatch('clean_activity_name', 'dbt_aql')(stream, activity_name)) }}
 {% endmacro %}
 
+
 {% macro default__clean_activity_name(stream, activity_name) %}
-{%- if execute -%}
-    {%- set model_prefix = var("dbt_aql").get("streams").get(stream, {}).get("model_prefix", "") -%}
-{%- else -%}
-    {%- set model_prefix = "__" -%}
-{%- endif -%}
+{%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
 
 {%- set name_split = modules.re.split(model_prefix, activity_name) -%}
 {%- if name_split|length > 1 -%}
@@ -59,4 +56,9 @@
 
 {% macro _required_prefix() %}
 {%- do return("req__") -%}
+{% endmacro %}
+
+{% macro get_model_prefix(stream) %}
+{%- set model_prefix = var("dbt_aql").get("streams").get(stream, {}).get("model_prefix", "__") -%}
+{%- do return(model_prefix) -%}
 {% endmacro %}

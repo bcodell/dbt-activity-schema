@@ -23,7 +23,8 @@
 {%- set stream, rest = dbt_aql._parse_stream(rest) -%}
 {%- set primary_activity, rest = dbt_aql._parse_activity(rest, stream, [av.select]) -%}
 
-{%- set verb_str = "({aggregate}|{append})".format(aggregate=av.aggregate, append=av.append) -%}
+
+{%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
 {%- set keyword_str = ws~verb_str~ws -%}
 
 {%- if modules.re.search(keyword_str, " "~rest) is none -%}
@@ -33,19 +34,28 @@
     {%- set num_activities = activity_starts|length -%}
 {%- endif -%}
 {%- set joined_activities = [] -%}
+{%- set included_dataset_columns = [] -%}
 {%- set rest_dict = {'rest': rest} -%}
 {%- for i in range(num_activities) -%}
-
-    {%- set joined_activity, x = dbt_aql._parse_activity(rest_dict.rest, stream, [av.append, av.aggregate]) -%}
-    {%- do rest_dict.update({'rest': x}) -%}
-    {%- do joined_activities.append(joined_activity) -%}
+    {%- set verb, unused_rest = dbt_aql._parse_keyword(rest_dict.rest, [av.append, av.aggregate, av.include]) -%}
+    {%- if verb in [av.append, av.aggregate] -%}
+        {%- set joined_activity, x = dbt_aql._parse_activity(rest_dict.rest, stream, [av.append, av.aggregate]) -%}
+        {%- do joined_activities.append(joined_activity) -%}
+        {%- do rest_dict.update({'rest': x}) -%}
+    {%- elif verb == av.include -%}
+        {%- set included_columns, x = dbt_aql._parse_included_columns(rest_dict.rest, stream, [av.include]) -%}
+        {%- for ic in included_columns -%}
+            {%- do included_dataset_columns.append(ic) -%}
+        {%- endfor -%}
+        {%- do rest_dict.update({'rest': x}) -%}
+    {%- endif -%}
 {%- endfor -%}
-
 {%- do return(namespace(
     name='parsed_aql',
     stream=stream,
     primary_activity=primary_activity,
-    joined_activities=joined_activities
+    joined_activities=joined_activities,
+    included_dataset_columns=included_dataset_columns
 )) -%}
 {% endmacro %}
 
@@ -79,8 +89,9 @@ Error: aql query in model '{{ model.unique_id }}' specifies unconfigured stream 
 The stream name should be listed as a variable in dbt_project.yml like so:
 vars:
   dbt_aql:
-    {{stream}}:
-      customer_id_alias: <alias>
+    streams:
+        {{stream}}:
+        customer_id_alias: <alias>
     {%- endset -%}
     {{ exceptions.raise_compiler_error(error_message) }}
 {%- else -%}
@@ -96,7 +107,7 @@ vars:
 {%- set vqs = dbt_aql._valid_query_syntax() -%}
 {%- set rs = vqs.relationship_selectors -%}
 {%- set verb, query = dbt_aql._parse_keyword(query, expected_verbs) -%}
-{%- set verb_str = "({aggregate}|{append})".format(aggregate=av.aggregate, append=av.append) -%}
+{%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
 {%- set keyword_str = ws~verb_str~ws -%}
 {%- if modules.re.search(keyword_str, query) is not none -%}
     {%- set end = modules.re.search(keyword_str, query).start() -%}
@@ -306,4 +317,52 @@ be wrapped in a valid aggregation function.
 {%- else -%}
     {%- do return(none) -%}
 {%- endif -%}
+{% endmacro %}
+
+{% macro _parse_included_columns(query, stream, expected_verbs) %}
+{%- set ws = dbt_aql.whitespace() -%}
+{%- set av = dbt_aql._activity_verbs() -%}
+{%- set verb, query = dbt_aql._parse_keyword(query, expected_verbs) -%}
+{%- set first_char = query.strip()[0] -%}
+{%- if first_char != "(" -%}
+    {%- set error_message -%}
+aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap specified columns in parentheses. Expected '(', got '{{first_char}}' See:
+{{ query }}
+    {%- endset -%}
+    {{ exceptions.raise_compiler_error(error_message) }}
+{%- endif -%}
+
+{%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
+{%- set keyword_str = ws~verb_str~ws -%}
+{%- if modules.re.search(keyword_str, query) is not none -%}
+    {%- set end = modules.re.search(keyword_str, query).start() -%}
+    {%- set query_rest = query[end:].strip() -%}
+    {%- set query = query[:end].strip() -%}
+{%- else -%}
+    {%- set query_rest = none -%}
+{%- endif -%}
+
+{%- set last_char = query.strip()[-1] -%}
+{%- if last_char != ")" -%}
+    {%- set error_message -%}
+aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap specified columns in parentheses. Expected ')', got '{{first_char}}' See:
+{{ query }}
+    {%- endset -%}
+    {{ exceptions.raise_compiler_error(error_message) }}
+{%- endif -%}
+
+{%- set column_str = modules.re.split(",", query[1:-1].strip()) -%}
+{%- do return((column_str, query_rest)) -%}
+
+{% endmacro %}
+
+{% macro get_graph() %}
+{% if execute %}
+{{ log(graph.nodes, info=true) }}
+{% endif %}
+{% endmacro %}
+
+{% macro tm(stream, aql) %}
+{% set aql = config.require('aql') %}
+-- depends_on: stream
 {% endmacro %}

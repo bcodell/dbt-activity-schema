@@ -19,8 +19,44 @@
 {%- set joined = dbt_aql.joined() -%}
 {%- set joined_activities = parsed_query.joined_activities -%}
 {%- set req = dbt_aql._required_prefix() -%}
+{%- set included_columns = parsed_query.included_dataset_columns -%}
+{%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
+
+{% for ic in included_columns %}
+    {%- set ic_activity = dbt_aql._build_activity_from_dataset_column(stream, ic) -%}
+    {%- if ic_activity is not none -%}
+        {%- do joined_activities.append(ic_activity) -%}
+    {%- endif -%}
+{% endfor %}
 
 -- depends_on: {{ ref(stream) }}
+{% for ic in included_columns %}
+    {% if modules.re.search(model_prefix, ic) is none %}
+        {% set m = model_prefix~ic %}
+-- depends_on: {{ ref(m) }}
+    {% else %}
+-- depends_on: {{ ref(ic) }}
+    {% endif %}
+{% endfor %}
+
+{%- set ja_dict = {} -%}
+{%- for ja in joined_activities -%}
+    {%- if ja.extra_joins is none -%}
+        {%- set extra_join_str = "none" -%}
+    {%- else -%}
+        {%- set extra_join_str = ja.extra_joins|join("__") -%}
+    {%- endif -%}
+    {%- set key = (ja.verb, ja.relationship_selector, ja.join_clause, ja.activity_name, ja.nth, extra_join_str) -%}
+    {%- if key in ja_dict.keys() -%}
+        {%- for col in ja.columns -%}
+            {%- do ja_dict[key]["columns"].append(col) -%}
+        {%- endfor -%}
+    {%- else -%}
+        {%- do ja_dict.update({key: ja}) -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{%- set joined_activities = ja_dict.values() -%}
 
 with {{primary_activity_alias}} as (
     select
