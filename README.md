@@ -428,8 +428,10 @@ select all primary_activity (
 aggregate after activity_1 (
     count(activity_id) as count_activity_1_within_1_hour_after
     sum(feature_x) as sum_feature_x_within_1_hour_after
-    -- join after primary activity as long as it was within 1 hour of primary activity
-    join {joined}.{ts} < dateadd('h', 1, {primary}.{ts})
+    -- join after primary activity as long as it was within 30-60 minutes of primary activity
+    -- each criteria instantiated with a join, no "and"
+    join {joined}.{ts} > dateadd('minutes', 30, {primary}.{ts})
+    join {joined}.{ts} < dateadd('minutes', 60, {primary}.{ts})
 )
 -- second joined activity
 append first after activity_2 (
@@ -438,7 +440,10 @@ append first after activity_2 (
     join json_extract_path_text({joined}.{feature_json}, 'product_type') = {primary}.primary_activity_product_type
 )
 ```
-Add within the column specification for the Joined Activity. Supports f-string functionality for the following keywords:
+Joined Activities can be further refined to the Primary Activity via extra join criteria. This functionality is useful for building datasets that represent subprocesses within a given Activity Schema (e.g. application-specific activities in a `job_stream` for recruiting data). This functionality is achieved by using the `join` keyword after all specified columns in the column selection block for a given Joined Activity. It is not applicable to Primary Activities; including this clause will be ignored. Each join criteria should be initialized with a `join` clause (no `and` clause used). It should be specified after the `filter` clause (if one exists in the statement). Each declared clause should relate a column from the Primary Activity to a column in the Joined Activity.
+
+
+This feature supports f-string functionality for the following keywords:
 * `joined` - will alias to the appropriate CTE alias for the Joined Activity when the aql is transpiled into SQL
 * `primary` - will alias to the appropriate CTE alias for the Primary Activity when the aql is transpiled into SQL
 * All of the default column names from the Activity Schema spec will be transformed to their appropriate aliases as defined in the project configuration (or the alias can be explicitly stated)
@@ -450,6 +455,7 @@ Add within the column specification for the Joined Activity. Supports f-string f
 > ⚠️ **WARNING: Do not use `{primary}` for custom logic for Joined Activities using the `aggregate` join method and the `all` join clause. For performance purposes, these Joined Activities are not actually joined back to the Primary Activity when deriving their aggregated columns, so there will be no `{primary}` CTE to join to, and a SQL error will be thrown.**
 
 </br>
+
 ## **Defining Canonical Dataset Columns**
 Since some columns from joined activities will represent canonical definitions for certain business values or metrics (e.g. `ts` from `append first ever created_account` is the agreed-upon business definition of when an account became active), it's important to have a means to persist that definition and reference it by its namespaced value. That is done in two steps - the `dataset_column` custom materialization and the `include` join method in aql. It is implemented as follows:
 
@@ -476,6 +482,47 @@ include (
 )
 ```
 
+</br>
+
+## **Filtering Activities**
+Activities can effectively be sub-classed using the `filter` clause. This functionality is particularly useful for ease of development and exploratory analysis of specific subsets of activities, instead of having to create a duplicated version of that activity. Filters can be applied to Primary Activities or Joined Activities. They should be included in the column selection block, after the columns and before the extra join clauses (if any). Each filter clause should be instantiated with a `filter` key.
+
+
+This feature supports f-string functionality for the following keywords:
+* `joined` - will alias to the appropriate CTE alias for the Joined Activity when the aql is transpiled into SQL
+* `primary` - will alias to the appropriate CTE alias for the Primary Activity when the aql is transpiled into SQL
+* All of the default column names from the Activity Schema spec will be transformed to their appropriate aliases as defined in the project configuration (or the alias can be explicitly stated)
+
+> ⚠️ **WARNING: Do not use `{primary}` for custom logic for Joined Activities using the `aggregate` join method and the `all` join clause. For performance purposes, these Joined Activities are not actually joined back to the Primary Activity when deriving their aggregated columns, so there will be no `{primary}` CTE to join to, and a SQL error will be thrown.**
+
+</br>
+
+> ⚠️ **WARNING: Columns contained in `feature_json` must be explicitly extracted and typecast. This package includes the convenience function `json_extract` to help - see example below for syntax specifics.**
+
+</br>
+
+Example code:
+```sql
+select first visited_page (
+    activity_id as activity_id,
+    entity_uuid as customer_id,
+    ts as first_visited_google_at
+    -- json_extract will be rendered appropriately based on the target
+    -- keys passed to json_extract should be wrapped in quotes
+    filter {{dbt_aql.json_extract('{feature_json}', 'referrer_url')}} = 'google.com'
+)
+append first ever visited_page (
+    ts as first_2023_page_visit_at
+    filter {ts} >= '2023-01-01'
+)
+aggregate all bought_something (
+    count(activity_id) as total_large_purchases_after
+    -- typecasting to non-string types (e.g. int) require including a nullif clause and an explicit typecast
+    -- initiate each filter criteria with a filter keyword (not and)
+    filter nullif({{dbt_aql.json_extract('{feature_json}', 'total_sales')}}, '')::int > 100
+    filter nullif({{dbt_aql.json_extract('{feature_json}', 'total_items_purchased')}}, '')::int > 3
+)
+```
 
 ## **Adding Custom Aggregation Functions**
 Placeholder. Documentation coming soon.
