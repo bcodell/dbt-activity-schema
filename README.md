@@ -441,9 +441,9 @@ append first after activity_2 (
 Add within the column specification for the Joined Activity. Supports f-string functionality for the following keywords:
 * `joined` - will alias to the appropriate CTE alias for the Joined Activity when the aql is transpiled into SQL
 * `primary` - will alias to the appropriate CTE alias for the Primary Activity when the aql is transpiled into SQL
-* All of the default column names from the Activity Schema spec will be transformed to their appropriate aliases as defined in the project configuration
+* All of the default column names from the Activity Schema spec will be transformed to their appropriate aliases as defined in the project configuration (or the alias can be explicitly stated)
 
-> **Note: Any column included with the Primary Activity will be available to be used in the extra join criteria for a Joined Activity. It can be referenced via its alias and does not need to be referenced via f-string syntax (see syntax second in second joined activity from example code above for reference).**
+> **Note: Any column included with the Primary Activity will be available to be used in the extra join criteria for a Joined Activity. It can be referenced via its alias and does not need to be referenced via f-string syntax (see syntax in second joined activity from example code above for reference).**
 
 </br>
 
