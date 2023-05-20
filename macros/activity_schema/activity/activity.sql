@@ -6,6 +6,7 @@
     relationship_selector,
     columns,
     nth=none,
+    filters=none,
     extra_joins=none
 ) %}
 
@@ -39,6 +40,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Parsed invalid re
     activity_name=activity_name,
     columns=columns,
     nth=nth,
+    filters=filters,
     extra_joins=extra_joins
 )) -%}
 

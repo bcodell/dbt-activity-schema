@@ -171,6 +171,7 @@ vars:
     relationship_selector=relationship_selector,
     columns=columns,
     nth=nth,
+    filters=filters,
     extra_joins=extra_joins
 ), query_rest)) -%}
 
@@ -219,13 +220,13 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
     {{ exceptions.raise_compiler_error(error_message) }}
 {%- endif -%}
 
-{%- set ws_join = ws~"join"~ws -%}
+{%- set ws_keyword = ws~"(filter|join)"~ws -%}
 {%- set query_stripped = query.strip()[1:-1] -%}
 
-{%- set join_ixs = modules.re.search(ws_join, query_stripped) -%}
-{%- if join_ixs is not none -%}
-    {%- set rest = query_stripped[join_ixs.start():] -%}
-    {%- set column_str = modules.re.split(",", query_stripped[:join_ixs.start()]) -%}
+{%- set keyword_ixs = modules.re.search(ws_keyword, query_stripped) -%}
+{%- if keyword_ixs is not none -%}
+    {%- set rest = query_stripped[keyword_ixs.start():] -%}
+    {%- set column_str = modules.re.split(",", query_stripped[:keyword_ixs.start()]) -%}
 {%- else -%}
     {%- set rest = none -%}
     {%- set column_str = modules.re.split(",", query_stripped) -%}
@@ -309,9 +310,33 @@ be wrapped in a valid aggregation function.
 
 {% endmacro %}
 
+{% macro _parse_filters(query) %}
+{%- set ws = dbt_aql.whitespace() -%}
+{%- set ws_join = ws~"join"~ws -%}
+{%- set query_stripped = query.strip() -%}
+
+{%- set join_ixs = modules.re.search(ws_join, query_stripped) -%}
+{%- if join_ixs is not none -%}
+    {%- set rest = query_stripped[join_ixs.start():] -%}
+    {%- set query = query_stripped[:join_ixs.start()] -%}
+{%- else -%}
+    {%- set rest = none -%}
+    {%- set query = query_stripped -%}
+{%- endif -%}
+
+{%- set filter_list = modules.re.split(ws~"filter"~ws, " "~query) -%}
+{%- if filter_list|length > 1 -%}
+    {%- set filters = filter_list[1:] -%}
+{%- else -%}
+    {%- set filters = none -%}
+{%- endif -%}
+{%- do return((filters, rest)) -%}
+{% endmacro %}
+
+
 {% macro _parse_extra_joins(query) %}
 {%- set ws = dbt_aql.whitespace() -%}
-{%- set extra_join_list = modules.re.split(ws~"join"~ws, query) -%}
+{%- set extra_join_list = modules.re.split(ws~"join"~ws, " "~query) -%}
 {%- if extra_join_list|length > 1 -%}
     {%- do return(extra_join_list[1:]) -%}
 {%- else -%}
@@ -354,15 +379,4 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
 {%- set column_str = modules.re.split(",", query[1:-1].strip()) -%}
 {%- do return((column_str, query_rest)) -%}
 
-{% endmacro %}
-
-{% macro get_graph() %}
-{% if execute %}
-{{ log(graph.nodes, info=true) }}
-{% endif %}
-{% endmacro %}
-
-{% macro tm(stream, aql) %}
-{% set aql = config.require('aql') %}
--- depends_on: stream
 {% endmacro %}
