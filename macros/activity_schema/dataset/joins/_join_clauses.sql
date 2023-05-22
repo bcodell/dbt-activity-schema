@@ -12,8 +12,9 @@
 
 {% macro _join_clause_between() %}
 {%- set ts = dbt_aql.schema_columns().ts -%}
+{%- set next_ts = dbt_aql.schema_columns().activity_repeated_at -%}
 {%- set req = dbt_aql._required_prefix() -%}
-{{dbt_aql.primary()}}.{{req}}{{ts}} < {{dbt_aql.joined()}}.{{ts}}
+{{dbt_aql.primary()}}.{{req}}{{ts}} < {{dbt_aql.joined()}}.{{ts}} and ({{dbt_aql.primary()}}.{{req}}{{next_ts}} > {{dbt_aql.joined()}}.{{ts}} or {{dbt_aql.primary()}}.{{req}}{{next_ts}} is null)
 {%- endmacro %}
 
 {% macro _join_clause_all() %}
