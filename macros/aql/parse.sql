@@ -158,6 +158,13 @@ vars:
 ) -%}
 
 {%- if rest is not none -%}
+    {%- set filters, rest = dbt_aql._parse_filters(rest) -%}
+{%- else -%}
+    {%- set filters = none -%}
+{%- endif -%}
+
+
+{%- if rest is not none -%}
     {%- set extra_joins = dbt_aql._parse_extra_joins(rest) -%}
 {%- else -%}
     {%- set extra_joins = none -%}
