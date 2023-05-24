@@ -1,5 +1,5 @@
 {% macro _listagg_delimiter() %}
-{%- do return("\n") -%}
+{%- do return(dbt.string_literal("\n")) -%}
 {% endmacro %}
 
 {% macro type_boolean() %}
