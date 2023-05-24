@@ -10,7 +10,7 @@
     {%- endif -%}
 
     {%- set activity_node = graph.get("nodes", {}).get("model."~project_name~"."~dataset_column, {}) -%}
-    {%- set aql = activity_node.config.get("aql", none) -%}
+    {%- set aql = activity_node.get("config", {}).get("aql", none) -%}
     {%- if aql is none -%}
         {%- set error_message -%}
     Dataset column model '{{dataset_column}}' does not have a required config key called `aql`.

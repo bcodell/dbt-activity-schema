@@ -24,7 +24,7 @@
 {%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
 
 {% for ic in included_columns %}
-    {%- set ic_activity = dbt_aql._build_activity_from_dataset_column(stream, ic) -%}
+    {%- set ic_activity = dbt_aql._build_activity_from_dataset_column(stream, ic.strip()) -%}
     {%- if ic_activity is not none -%}
         {%- do joined_activities.append(ic_activity) -%}
     {%- endif -%}
@@ -32,11 +32,12 @@
 
 -- depends_on: {{ ref(stream) }}
 {% for ic in included_columns %}
-    {% if modules.re.search(model_prefix, ic) is none %}
-        {% set m = model_prefix~ic %}
+    {% set ic_stripped = ic.strip() %}
+    {% if modules.re.search(model_prefix, ic_stripped) is none %}
+        {% set m = model_prefix~ic_stripped %}
 -- depends_on: {{ ref(m) }}
     {% else %}
--- depends_on: {{ ref(ic) }}
+-- depends_on: {{ ref(ic_stripped) }}
     {% endif %}
 {% endfor %}
 
