@@ -3,5 +3,5 @@
 {% endmacro %}
 
 {% macro default__aggfunc_listagg(column) %}
-listagg({{ column.column_sql }}, _listagg_delimiter())
+listagg({{ column.column_sql }}, {{dbt_aql._listagg_delimiter()}})
 {% endmacro %}
