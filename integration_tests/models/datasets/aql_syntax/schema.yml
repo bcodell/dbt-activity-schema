@@ -7,3 +7,10 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref("output__filtered")
+
+  - name: dataset__joined
+    description: A test to validate the functionality of join clauses in aql.
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref("output__joined")
+
