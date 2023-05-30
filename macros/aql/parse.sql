@@ -320,7 +320,7 @@ be wrapped in a valid aggregation function.
 {% macro _parse_filters(query) %}
 {%- set ws = dbt_aql.whitespace() -%}
 {%- set ws_join = ws~"join"~ws -%}
-{%- set query_stripped = query.strip() -%}
+{%- set query_stripped = ' '~query.strip() -%}
 
 {%- set join_ixs = modules.re.search(ws_join, query_stripped) -%}
 {%- if join_ixs is not none -%}
