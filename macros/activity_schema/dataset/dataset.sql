@@ -108,7 +108,7 @@ with
         and {{ primary_activity.relationship_clause }}
 ){% if joined_activities|length > 0 %},{% endif %}
 {% for ja in joined_activities %}
-{% if ja.filters is not none and (ja.verb, ja.join_condition) != (av.aggregate, jc.all) %}
+{% if ja.filters is not none and ja.verb == av.append %}
 {{dbt_aql.alias_activity(ja, loop.index)}}{{fs}} as (
     select
         {%- for column in columns.items() %}
@@ -141,7 +141,7 @@ with
         {{ column.aggfunc(parsed_col) }} as {{ column.alias }}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}
     from {{primary_activity_alias}} as {{primary}}
-    left join {% if ja.filters is none %}{{ stream_relation }}{% else %}{{dbt_aql.alias_activity(ja, loop.index)}}{{fs}}{% endif %} {{joined}}
+    left join {% if ja.filters is not none and ja.verb == av.append %}{{dbt_aql.alias_activity(ja, loop.index)}}{{fs}}{% else %}{{ stream_relation }}{% endif %} {{joined}}
         -- filter joined activity first to improve query performance
         on {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
         {%- if ja.relationship_clause is not none %}
@@ -157,6 +157,12 @@ with
         and {{ej_formatted}}
         {%- endfor %}
         {%- endif %}
+        {% if ja.filters is not none and ja.verb == av.aggregate %}
+        {% for f in ja.filters %}
+        {%- set f_formatted = f.format(primary=primary, joined=joined, **columns) %}
+        and {{f_formatted}}
+        {%- endfor %}
+        {% endif %}
     group by 1
     {% else %}
     -- special join case for aggregate all to improve performance
