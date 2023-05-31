@@ -280,7 +280,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
     {%- endif -%}
 
 {%- elif verb == av.aggregate -%}
-    {%- if modules.re.search("\(", column_str), modules.re.IGNORECASE is not none -%}
+    {%- if modules.re.search("\(", column_str, modules.re.IGNORECASE) is not none -%}
         {%- set aggfunc_str, column_str = dbt_aql._parse_keyword(column_str, am.valid_aggregations) -%}
         {%- set aggfunc = am[aggfunc_str] -%}
         {%- set column_str = column_str.translate(column_str.maketrans("","", punc)).strip() -%}
