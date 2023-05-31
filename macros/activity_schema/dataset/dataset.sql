@@ -148,9 +148,7 @@ with
         and {{ ja.relationship_clause }}
         {%- endif %}
         and {{primary}}.{{req}}{{columns.customer}} = {{joined}}.{{columns.customer}}
-        {%- if ja.verb == av.aggregate %}
         and {{ ja.join_clause }}
-        {%- endif -%}
         {%- if ja.extra_joins is not none %}
         {%- for ej in ja.extra_joins %}
         {%- set ej_formatted = ej.format(primary=primary, joined=joined, **columns) %}
