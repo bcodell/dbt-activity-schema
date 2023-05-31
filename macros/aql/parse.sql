@@ -10,7 +10,7 @@
 
 
 {% macro _clean_query(query) %}
-{%- do return(modules.re.split(dbt_aql.whitespace(), query.lower().strip())|join(" ")) -%}
+{%- do return(modules.re.split(dbt_aql.whitespace(), query.strip())|join(" ")) -%}
 {% endmacro %}
 
 
@@ -27,10 +27,10 @@
 {%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
 {%- set keyword_str = ws~verb_str~ws -%}
 
-{%- if modules.re.search(keyword_str, " "~rest) is none -%}
+{%- if modules.re.search(keyword_str, " "~rest, modules.re.IGNORECASE) is none -%}
     {%- set num_activities = 0 -%}
 {%- else -%}
-    {%- set activity_starts = modules.re.findall(keyword_str, " "~rest) -%}
+    {%- set activity_starts = modules.re.findall(keyword_str, " "~rest.lower()) -%}
     {%- set num_activities = activity_starts|length -%}
 {%- endif -%}
 {%- set joined_activities = [] -%}
@@ -60,7 +60,7 @@
 {% endmacro %}
 
 {% macro _parse_keyword(query, keywords=none) %}
-{%- set parsed_word = modules.re.split("\(", modules.re.split(dbt_aql.whitespace(), query.strip())[0].strip())[0].strip() -%}
+{%- set parsed_word = modules.re.split("\(", modules.re.split(dbt_aql.whitespace(), query.lower().strip())[0].strip())[0].strip() -%}
 {%- if keywords is none -%}
     {%- set parsed_word_len = parsed_word|length -%}
     {%- do return((parsed_word, query[parsed_word_len:].strip())) -%}
@@ -109,8 +109,8 @@ vars:
 {%- set verb, query = dbt_aql._parse_keyword(query, expected_verbs) -%}
 {%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
 {%- set keyword_str = ws~verb_str~ws -%}
-{%- if modules.re.search(keyword_str, query) is not none -%}
-    {%- set end = modules.re.search(keyword_str, query).start() -%}
+{%- if modules.re.search(keyword_str, query, modules.re.IGNORECASE) is not none -%}
+    {%- set end = modules.re.search(keyword_str, query, modules.re.IGNORECASE).start() -%}
     {%- set query_rest = query[end:].strip() -%}
     {%- set query = query[:end].strip() -%}
 {%- else -%}
@@ -230,7 +230,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
 {%- set ws_keyword = ws~"(filter|join)"~ws -%}
 {%- set query_stripped = query.strip()[1:-1] -%}
 
-{%- set keyword_ixs = modules.re.search(ws_keyword, query_stripped) -%}
+{%- set keyword_ixs = modules.re.search(ws_keyword, query_stripped, modules.re.IGNORECASE) -%}
 {%- if keyword_ixs is not none -%}
     {%- set rest = query_stripped[keyword_ixs.start():] -%}
     {%- set column_str = modules.re.split(",", query_stripped[:keyword_ixs.start()]) -%}
@@ -280,7 +280,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
     {%- endif -%}
 
 {%- elif verb == av.aggregate -%}
-    {%- if modules.re.search("\(", column_str) is not none -%}
+    {%- if modules.re.search("\(", column_str, modules.re.IGNORECASE) is not none -%}
         {%- set aggfunc_str, column_str = dbt_aql._parse_keyword(column_str, am.valid_aggregations) -%}
         {%- set aggfunc = am[aggfunc_str] -%}
         {%- set column_str = column_str.translate(column_str.maketrans("","", punc)).strip() -%}
@@ -300,7 +300,7 @@ be wrapped in a valid aggregation function.
 {%- set column = modules.re.split("(\)|{ws})".format(ws=ws), column_str)[0].strip() -%}
 
 {%- set ws_as = ws~"as"~ws -%}
-{%- if modules.re.search(ws_as, column_str) is not none -%}
+{%- if modules.re.search(ws_as, column_str, modules.re.IGNORECASE) is not none -%}
     {%- set alias_base = modules.re.split(ws_as, column_str.strip())[-1] -%}
     {%- set alias = alias_base.translate(alias_base.maketrans("","", punc)).strip() -%}
 {%- else -%}
@@ -322,7 +322,7 @@ be wrapped in a valid aggregation function.
 {%- set ws_join = ws~"join"~ws -%}
 {%- set query_stripped = ' '~query.strip() -%}
 
-{%- set join_ixs = modules.re.search(ws_join, query_stripped) -%}
+{%- set join_ixs = modules.re.search(ws_join, query_stripped, modules.re.IGNORECASE) -%}
 {%- if join_ixs is not none -%}
     {%- set rest = query_stripped[join_ixs.start():] -%}
     {%- set query = query_stripped[:join_ixs.start()] -%}
@@ -366,8 +366,8 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
 
 {%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
 {%- set keyword_str = ws~verb_str~ws -%}
-{%- if modules.re.search(keyword_str, query) is not none -%}
-    {%- set end = modules.re.search(keyword_str, query).start() -%}
+{%- if modules.re.search(keyword_str, query, modules.re.IGNORECASE) is not none -%}
+    {%- set end = modules.re.search(keyword_str, query, modules.re.IGNORECASE).start() -%}
     {%- set query_rest = query[end:].strip() -%}
     {%- set query = query[:end].strip() -%}
 {%- else -%}
