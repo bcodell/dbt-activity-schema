@@ -45,6 +45,16 @@
 
 {%- set ja_dict = {} -%}
 {%- for ja in joined_activities -%}
+    {% if execute %}
+        {%- set project_name = model['unique_id'].split(".")[1] -%}
+        {%- set activity_node_check = graph.get("nodes", {}).get("model."~project_name~"."~model_prefix~ja.activity_name, None) -%}
+        {%- if activity_node_check is none -%}
+            {%- set error_message -%}
+aql query in model '{{ model.unique_id }}' has invalid syntax. Please choose a valid activity - selected '{{ja.activity_name}}'
+            {%- endset -%}
+            {{ exceptions.raise_compiler_error(error_message) }}
+        {% endif %}
+    {% endif %}
     {%- if ja.extra_joins is none -%}
         {%- set extra_join_str = "none" -%}
     {%- else -%}
