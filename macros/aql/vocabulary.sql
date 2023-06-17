@@ -30,10 +30,12 @@
     name="join_conditions",
     before="before",
     between="between",
+    between_before="between_before",
+    between_after="between_after",
     after="after",
     ever="ever",
     all="all",
-    condition_list=["before", "between", "after", "ever", "all"]
+    condition_list=["before", "between", "between_before", "between_after", "after", "ever", "all"]
 )) -%}
 
 {% endmacro %}
@@ -52,8 +54,8 @@
 
 {%- set join_conditions = namespace(
     name="join_conditions",
-    append=[jc.before, jc.after, jc.between, jc.ever],
-    aggregate=[jc.before, jc.after, jc.between, jc.all],
+    append=[jc.before, jc.after, jc.between, jc.between_before, jc.between_after, jc.ever],
+    aggregate=[jc.before, jc.after, jc.between, jc.between_before, jc.between_after, jc.all],
     registry=jc
 ) -%}
 
