@@ -5,10 +5,10 @@ select all signed_up (
     entity_uuid as customer_id,
     ts as signed_up_at
 )
-append first between visited_page (
+append first between_after visited_page (
     referrer_url as first_between_referrer_url
 )
-append first between bought_something(
+append first between_after bought_something(
     total_items_purchased as first_between_total_items_purchased,
     ts as first_between_bought_something_at
 )

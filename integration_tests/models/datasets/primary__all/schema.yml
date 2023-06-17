@@ -20,6 +20,12 @@ models:
       - dbt_utils.equality:
           compare_model: ref("output__select_all_aggregate_before")
 
+  - name: dataset__select_all_aggregate_between_before
+    description: A test to validate compatibility of a dataset that selects all instances of a primary activity and aggregates between before to a joined activity.
+    tests:
+      - dbt_utils.equality:
+          compare_model: ref("output__select_all_aggregate_between_before")
+
   - name: dataset__select_all_aggregate_between
     description: A test to validate compatibility of a dataset that selects all instances of a primary activity and aggregates between to a joined activity.
     tests:
