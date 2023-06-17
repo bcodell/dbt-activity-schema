@@ -30,6 +30,7 @@
     activity = "activity",
     feature_json = "feature_json",
     activity_occurrence = "activity_occurrence",
+    previous_activity_occurrence_at = "previous_activity_occurrence_at",
     activity_repeated_at = "activity_repeated_at",
 ) -%}
 
@@ -83,6 +84,7 @@ to alias are '{{required_columns.keys()}}'
     columns.activity: dbt.type_string(),
     columns.feature_json: dbt_aql.type_json(),
     columns.activity_occurrence: dbt.type_int(),
+    columns.previous_activity_occurrence_at: dbt.type_timestamp(),
     columns.activity_repeated_at: dbt.type_timestamp()
 } -%}
 {%- if "revenue_impact" in columns.keys() -%}

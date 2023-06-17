@@ -82,7 +82,7 @@ with
 {{primary_activity_alias}}{{fs}} as (
     select
         {%- for column in columns.items() %}
-        {%- if column[0] not in ['activity_occurrence', 'activity_repeated_at'] %}
+        {%- if column[0] not in ['activity_occurrence', 'activity_repeated_at', 'previous_activity_occurrence_at'] %}
         {{primary}}.{{column[1]}},
         {%- endif %}
         {%- endfor %}
@@ -90,6 +90,10 @@ with
             partition by {{primary}}.{{columns.customer}}
             order by {{primary}}.{{columns.ts}}, {{primary}}.{{columns.activity_id}}
         ) as {{columns.activity_occurrence}},
+        lag({{columns.ts}}) over (
+            partition by {{primary}}.{{columns.customer}}
+            order by {{primary}}.{{columns.ts}}, {{primary}}.{{columns.activity_id}}
+        ) as {{columns.previous_activity_occurrence_at}},
         lead({{columns.ts}}) over (
             partition by {{primary}}.{{columns.customer}}
             order by {{primary}}.{{columns.ts}}, {{primary}}.{{columns.activity_id}}
@@ -110,6 +114,7 @@ with
         {{primary}}.{{columns.ts}} as {{req}}{{columns.ts}},
         {{primary}}.{{columns.activity_occurrence}} as {{req}}{{columns.activity_occurrence}},
         {{primary}}.{{columns.activity_repeated_at}} as {{req}}{{columns.activity_repeated_at}},
+        {{primary}}.{{columns.previous_activity_occurrence_at}} as {{req}}{{columns.previous_activity_occurrence_at}},
         {%- for column in primary_activity.columns %}
         {{ dbt_aql.select_column(stream, primary, column).column_sql }} as {{column.alias}}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}

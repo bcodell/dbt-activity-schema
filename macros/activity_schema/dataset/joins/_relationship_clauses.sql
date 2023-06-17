@@ -13,7 +13,7 @@
         {%- set statement -%}
 {{alias}}.{{activity_occurrence}} = 1
         {%- endset -%}
-    {%- elif join_condition in [jc.after, jc.between] -%}
+    {%- elif join_condition in [jc.after, jc.between, jc.between_before, jc.between_after] -%}
         {%- set statement = none -%}
     {%- endif -%}
 {%- endif -%}
@@ -35,7 +35,7 @@
         {%- set statement -%}
 {{alias}}.{{activity_repeated_at}} is null
         {%- endset -%}
-    {%- elif join_condition in [jc.before, jc.between] -%}
+    {%- elif join_condition in [jc.before, jc.between, jc.between_before, jc.between_after] -%}
         {%- set statement = none -%}
     {%- endif -%}
 {%- endif -%}

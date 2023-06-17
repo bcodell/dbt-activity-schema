@@ -87,7 +87,11 @@ select
     , row_number() over (
         partition by {{columns.customer}}
         order by {{columns.ts}}, {{surrogate_key_statement}}
-    ) as activity_occurrence
+    ) as {{columns.activity_occurrence}}
+    , lag(cast({{columns.ts}} as {{dbt.type_timestamp()}})) over (
+        partition by {{columns.customer}}
+        order by {{columns.ts}}, {{surrogate_key_statement}}
+    ) as {{columns.previous_activity_occurrence_at}}
     , lead(cast({{columns.ts}} as {{dbt.type_timestamp()}})) over (
         partition by {{columns.customer}}
         order by {{columns.ts}}, {{surrogate_key_statement}}
