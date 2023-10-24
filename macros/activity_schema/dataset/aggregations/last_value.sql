@@ -23,7 +23,7 @@ cast(split_part(
 {%- set delimiter = ";.,;" -%}
 cast(
     {{ dbt.split_part(
-        string_text='cast(' ~ joined ~ '.' ~ ts ~ ' as ' ~ dbt.type_string() ~ ')' ~ dbt.string_literal(delimiter) ~ 'cast(' ~ column.column_sql ~ ' as ' ~ dbt.type_string() ~ ')',
+        string_text='cast(' || joined || '.' || ts || ' as ' || dbt.type_string() || ')' || dbt.string_literal(delimiter) || 'cast(' || column.column_sql || ' as ' || dbt.type_string() || ')',
         delimiter_text=dbt.string_literal(delimiter),
         part_number=2
     ) }}
