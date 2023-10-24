@@ -265,6 +265,28 @@ aggregate after activity_3 (
     sum(feature_x) as sum_feature_x_after
 )
 ```
+
+To use in a dbt model, assign the aql query to a variable, and pass it to the `dataset` macro like so:
+```sql
+{% set aql %}
+using stream_1
+select all activity_1 (
+    ts as activity_1_at,
+    feature_1,
+    feature_2
+)
+append first ever activity_2 (
+    ts as first_ever_activity_2_at
+)
+aggregate after activity_3 (
+    count(activity_id) as count_activity_3_after
+    sum(feature_x) as sum_feature_x_after
+)
+{% endset %}
+
+{{ dbt_aql.dataset(aql) }}
+```
+
 Implementation details are provided below.
 </br></br>
 
