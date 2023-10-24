@@ -20,7 +20,7 @@ cast(split_part(
 {% macro bigquery__aggfunc_last_value(column) %}
 {%- set joined = dbt_aql.joined() -%}
 {%- set ts = dbt_aql.schema_columns().ts -%}
-{%- set delimiter = ")" -%}
+{%- set delimiter = ";.,;" -%}
 cast(
     {{ dbt.split_part(
         string_text='cast(' ~ joined ~ '.' ~ ts ~ ' as ' ~ dbt.type_string() ~ ')' ~ dbt.string_literal(delimiter) ~ 'cast(' ~ column.column_sql ~ ' as ' ~ dbt.type_string() ~ ')',
