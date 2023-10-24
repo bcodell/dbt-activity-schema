@@ -17,7 +17,7 @@ cast(split_part(
         ) as {{column.data_type}})
 {%- endmacro -%}
 
-{% macro bigquery__aggfunc_first_value(column) %}
+{% macro bigquery__aggfunc_last_value(column) %}
 {%- set joined = dbt_aql.joined() -%}
 {%- set ts = dbt_aql.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
