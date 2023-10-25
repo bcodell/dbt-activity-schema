@@ -21,9 +21,12 @@ cast(split_part(
 {%- set joined = dbt_aql.joined() -%}
 {%- set ts = dbt_aql.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
+{%- set string_text = 'max(cast(' ~ joined ~ '.' ~ ts ~ ' as ' ~ dbt.type_string() ~ ')' ~ 
+    ' || ' ~ dbt.string_literal(delimiter) ~ 
+    ' || ' ~ 'cast(' ~ column.column_sql ~ ' as ' ~ dbt.type_string() ~ '))' -%}
 cast(
     {{ dbt.split_part(
-        string_text='cast(' ~ joined ~ '.' ~ ts ~ ' as ' ~ dbt.type_string() ~ ')' ~ ' || ' ~ dbt.string_literal(delimiter) ~ ' || ' ~ 'cast(' ~ column.column_sql ~ ' as ' ~ dbt.type_string() ~ ')',
+        string_text=string_text,
         delimiter_text=dbt.string_literal(delimiter),
         part_number=2
     ) }}
