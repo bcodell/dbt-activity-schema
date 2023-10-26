@@ -8,7 +8,7 @@ select first visited_page (
 )
 aggregate after bought_something (
     count(activity_id) as total_large_purchases_after
-    join nullif({{dbt_aql.json_extract('{joined}.{feature_json}', 'total_sales')}}, '')::int > 100
+    join cast(nullif({{dbt_aql.json_extract('{joined}.{feature_json}', 'total_sales')}}, '') as int) > 100
 )
 include (
     total_items_purchased_after
