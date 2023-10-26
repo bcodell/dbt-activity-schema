@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.10"
 dbt-duckdb = "~1.6"
 dbt-postgres = "~1.6"
+dbt-bigquery = "~1.6"
 
 [build-system]
 requires = ["poetry-core"]
