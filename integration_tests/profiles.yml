@@ -23,10 +23,10 @@ integration_tests:
     bigquery:
       type: bigquery
       method: service-account
-      project: 
-      dataset: 
+      project: dbt-aql
+      dataset: dbt_aql_integration_tests
       threads: 4 # Must be a value of 1 or greater
-      keyfile: 
+      keyfile: tbd # need to update for CI
       OPTIONAL_CONFIG: VALUE
 
   target: duckdb
