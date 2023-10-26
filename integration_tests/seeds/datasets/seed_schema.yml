@@ -1,0 +1,76 @@
+version: 2
+
+seeds:
+  - name: output__select_all_append_first_before
+    config:
+      column_types:
+        first_before_total_items_purchased: integer
+        first_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+
+        
+  - name: output__select_all_append_last_before
+    config:
+      column_types:
+        last_before_total_items_purchased: integer
+        last_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_all_append_nth_before
+    config:
+      column_types:
+        first_before_referrer_url: string
+        second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_first_append_first_before
+    config:
+      column_types:
+        first_before_total_items_purchased: integer
+        first_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_first_append_last_before
+    config:
+      column_types:
+        last_before_total_items_purchased: integer
+        last_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_first_append_nth_before
+    config:
+      column_types:
+        first_before_referrer_url: string
+        second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_last_append_first_before
+    config:
+      column_types:
+        first_before_total_items_purchased: integer
+        first_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_last_append_last_before
+    config:
+      column_types:
+        last_before_total_items_purchased: integer
+        last_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_last_append_nth_before
+    config:
+      column_types:
+        first_before_referrer_url: string
+        second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_nth_append_first_before
+    config:
+      column_types:
+        first_before_total_items_purchased: integer
+        first_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_nth_append_last_before
+    config:
+      column_types:
+        last_before_total_items_purchased: integer
+        last_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
+  - name: output__select_nth_append_nth_before
+    config:
+      column_types:
+        first_before_referrer_url: string
+        second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
