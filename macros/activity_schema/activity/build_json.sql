@@ -54,7 +54,7 @@
         {% endfor -%}
     ))
     {%- else -%}
-    null
+    to_json(null)
     {%- endif -%}
 {%- endmacro -%}
 
