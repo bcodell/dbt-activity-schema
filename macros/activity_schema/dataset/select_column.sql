@@ -46,7 +46,7 @@ json_extract_path_text({{ json_col }}, {{dbt.string_literal(key) }})
 {%- endmacro %}
 
 {% macro bigquery__json_extract(json_col, key) -%}
-string(json_extract({{ json_col }}, {{dbt.string_literal("$."~key) }}))
+json_value({{ json_col }}.{{key}})
 {%- endmacro %}
 
 {%- macro snowflake__json_extract(json_col, key) -%}
