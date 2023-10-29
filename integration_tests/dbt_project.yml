@@ -37,4 +37,8 @@ seeds:
   dbt_aql_integration_tests:
     datasets:
       +column_types:
-        customer_id: text
+        customer_id: string
+
+dispatch:
+  - macro_namespace: dbt
+    search_order: ['dbt_aql_integration_tests', 'dbt_aql', 'dbt']

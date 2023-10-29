@@ -12,8 +12,8 @@ append first ever visited_page (
 )
 aggregate all bought_something (
     count(activity_id) as total_large_purchases_after
-    filter nullif({{dbt_aql.json_extract('{feature_json}', 'total_sales')}}, '')::int > 100
-    filter nullif({{dbt_aql.json_extract('{feature_json}', 'total_items_purchased')}}, '')::int > 3
+    filter cast(nullif({{dbt_aql.json_extract('{feature_json}', 'total_sales')}}, '') as int) > 100
+    filter cast(nullif({{dbt_aql.json_extract('{feature_json}', 'total_items_purchased')}}, '') as int) > 3
 )
 include (
     total_items_purchased_after
