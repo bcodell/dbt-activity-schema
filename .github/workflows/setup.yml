@@ -12,9 +12,6 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    permissions:
-        id-token: write
-        contents: read
     env:
       GCP_KEYFILE: ${{ secrets.gcp_keyfile }}
 
