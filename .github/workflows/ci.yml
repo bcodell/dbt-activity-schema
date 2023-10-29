@@ -2,18 +2,49 @@ name: CI
 on:
   workflow_call:
     inputs:
-      target:
+      gcp_keyfile_path:
         type: string
+        required: true
+    secrets:
+      gcp_keyfile:
         required: true
     
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      GCP_KEYFILE: ${{ secrets.GCP_KEYFILE }}
+
     steps:
-      - name: Build dbt Integration Tests Project
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python -
+      - name: Install Python Dependencies
+        run: |
+          poetry config virtualenvs.create false
+          poetry install
+      - name: Publish GCP Keyfile
+        run: echo $GCP_KEYFILE > ${{ inputs.gcp_keyfile_path }}
+      - name: Run dbt deps
+        run: |
+          cd ./integration_tests
+          dbt deps
+      - name: dbt CI - duckdb
         run: |
           pwd
-          dbt build -x --target ${{ inputs.target }}
+          dbt build -x --target duckdb
+        env:
+          GCP_KEYFILE_PATH: ./gcp_keyfile.json
+          DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
+      - name: dbt CI - bigquery
+        run: |
+          pwd
+          dbt build -x --target bigquery
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
