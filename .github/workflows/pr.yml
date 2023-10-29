@@ -6,7 +6,5 @@ on:
 jobs:
   CI:
     uses: ./.github/workflows/ci.yml
-    with:
-      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
     secrets:
       gcp_keyfile: ${{ secrets.GCP_KEYFILE }}

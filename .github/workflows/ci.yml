@@ -1,10 +1,6 @@
 name: CI
 on:
   workflow_call:
-    inputs:
-      gcp_keyfile_path:
-        type: string
-        required: true
     secrets:
       gcp_keyfile:
         required: true
@@ -28,8 +24,6 @@ jobs:
         run: |
           poetry config virtualenvs.create false
           poetry install
-      - name: Publish GCP Keyfile
-        run: echo $GCP_KEYFILE > ${{ inputs.gcp_keyfile_path }}
       - name: Run dbt deps
         run: |
           cd ./integration_tests
@@ -44,6 +38,7 @@ jobs:
       - name: dbt CI - bigquery
         run: |
           cd ./integration_tests
+          echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
           dbt build -x --target bigquery
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
