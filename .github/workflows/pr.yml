@@ -6,9 +6,10 @@ on:
 jobs:
   setup:
     uses: ./.github/workflows/setup.yml
+    with:
+      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
     secrets:
       gcp_keyfile: ${{ secrets.GCP_KEYFILE }}
-      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
 
   duckdb:
     needs: [ setup ]
