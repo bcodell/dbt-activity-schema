@@ -1,0 +1,25 @@
+name: CI - Pull Request
+on: 
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  setup:
+    uses: ./.github/workflows/setup.yml
+    secrets:
+      gcp_keyfile: ${{ secrets.GCP_KEYFILE }}
+      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
+
+  duckdb:
+    needs: [ setup ]
+    uses: ./.github/workflows/ci.yml
+    with:
+      target: bigquery
+      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
+
+  bigquery:
+    needs: [ setup ]
+    uses: ./.github/workflows/ci.yml
+    with:
+      target: bigquery
+      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json

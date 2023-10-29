@@ -1,19 +1,26 @@
 name: CI
-
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  pull_request:
-    branches: [ main ]
-
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        required: true
+      gcp_keyfile_path:
+        type: string
+        required: true
+    
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
-    env:
-      DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
-
     steps:
-      - name: Checkout Branch
-        uses: actions/checkout@v2
+      - name: Build dbt Integration Tests Project
+        with:
+          target: ${{ inputs.target }}
+        env:
+          GCP_KEYFILE_PATH: ${{ inputs.gcp_keyfile_path }}
+          DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
+          run: |
+          cd ./integration_tests
+          dbt build -x --target ${{ inputs.target }}
 
-      - name: CI in Dockerfile
-        uses: ./.github/actions/run_ci
+

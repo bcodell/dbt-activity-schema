@@ -1,0 +1,40 @@
+name: Setup
+on:
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        required: true
+      gcp_keyfile_path:
+        type: string
+        required: true
+    secrets:
+      gcp_keyfile:
+        required: true
+    
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+        id-token: write
+        contents: read
+    env:
+      GCP_KEYFILE: ${{ secrets.gcp_keyfile }}
+
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python -
+      - name: Install Python Dependencies
+        run: poetry install --no-interaction
+      - name: Publish GCP Keyfile
+        run: echo $GCP_KEYFILE > ${{ inputs.gcp_keyfile_path }}
+      - name: dbt deps
+        run: |
+          cd ./integration_tests
+          dbt deps
