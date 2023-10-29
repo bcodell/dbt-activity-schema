@@ -25,7 +25,7 @@ jobs:
       - name: Install Poetry
         run: curl -sSL https://install.python-poetry.org | python -
       - name: Install Python Dependencies
-        run: pip install -r poetry.lock
+        run: pip install -e .
       - name: Publish GCP Keyfile
         run: echo $GCP_KEYFILE > ${{ inputs.gcp_keyfile_path }}
       - name: Run dbt deps
