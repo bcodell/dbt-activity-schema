@@ -2,4 +2,4 @@ logs
 tmp
 target
 dbt_packages
-
+*.json
