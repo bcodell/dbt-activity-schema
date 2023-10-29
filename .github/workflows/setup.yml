@@ -13,7 +13,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     env:
-      GCP_KEYFILE: ${{ secrets.gcp_keyfile }}
+      GCP_KEYFILE: ${{ secrets.GCP_KEYFILE }}
 
     steps:
       - name: Checkout Branch
