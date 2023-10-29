@@ -17,8 +17,6 @@ jobs:
     with:
       target: bigquery
       gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
-    secrets:
-      gcp_keyfile: ${{ secrets.GCP_KEYFILE }}
 
   bigquery:
     needs: [ setup ]
@@ -26,5 +24,3 @@ jobs:
     with:
       target: bigquery
       gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
-    secrets:
-      gcp_keyfile: ${{ secrets.GCP_KEYFILE }}
