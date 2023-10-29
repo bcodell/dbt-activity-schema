@@ -28,7 +28,7 @@ jobs:
         run: poetry install --no-interaction
       - name: Publish GCP Keyfile
         run: echo $GCP_KEYFILE > ${{ inputs.gcp_keyfile_path }}
-      - name: dbt deps
+      - name: Run dbt deps
         run: |
           poetry shell
           cd ./integration_tests
