@@ -16,11 +16,9 @@ jobs:
     uses: ./.github/workflows/ci.yml
     with:
       target: bigquery
-      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json
 
   bigquery:
     needs: [ setup ]
     uses: ./.github/workflows/ci.yml
     with:
       target: bigquery
-      gcp_keyfile_path: ./integration_tests/gcp_keyfile.json

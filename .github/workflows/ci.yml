@@ -5,9 +5,6 @@ on:
       target:
         type: string
         required: true
-      gcp_keyfile_path:
-        type: string
-        required: true
     
 jobs:
   ci:
@@ -15,10 +12,10 @@ jobs:
     steps:
       - name: Build dbt Integration Tests Project
         run: |
-          cd ./integration_tests
+          pwd
           dbt build -x --target ${{ inputs.target }}
         env:
-          GCP_KEYFILE_PATH: ${{ inputs.gcp_keyfile_path }}
+          GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
 
 
