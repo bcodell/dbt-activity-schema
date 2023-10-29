@@ -2,9 +2,6 @@ name: Setup
 on:
   workflow_call:
     inputs:
-      target:
-        type: string
-        required: true
       gcp_keyfile_path:
         type: string
         required: true
