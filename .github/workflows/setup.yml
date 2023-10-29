@@ -30,5 +30,6 @@ jobs:
         run: echo $GCP_KEYFILE > ${{ inputs.gcp_keyfile_path }}
       - name: dbt deps
         run: |
+          poetry shell
           cd ./integration_tests
           dbt deps
