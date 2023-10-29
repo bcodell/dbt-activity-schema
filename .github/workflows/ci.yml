@@ -14,13 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build dbt Integration Tests Project
-        with:
-          target: ${{ inputs.target }}
+        run: |
+          cd ./integration_tests
+          dbt build -x --target ${{ inputs.target }}
         env:
           GCP_KEYFILE_PATH: ${{ inputs.gcp_keyfile_path }}
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
-          run: |
-            cd ./integration_tests
-            dbt build -x --target ${{ inputs.target }}
 
 
