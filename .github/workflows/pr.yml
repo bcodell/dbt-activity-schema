@@ -1,0 +1,10 @@
+name: CI - Pull Request
+on: 
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  CI:
+    uses: ./.github/workflows/ci.yml
+    secrets:
+      gcp_keyfile: ${{ secrets.GCP_KEYFILE }}
