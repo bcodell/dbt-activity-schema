@@ -38,6 +38,7 @@ jobs:
       - name: dbt CI - bigquery
         run: |
           cd ./integration_tests
+          ls -l
           echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
           dbt build -x --target bigquery
         env:
