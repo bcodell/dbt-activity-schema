@@ -138,10 +138,12 @@ models:
     config:
       stream: stream_1
       data_types:
-        feature_1: {{type_int()}}
-        feature_2: {{type_string()}}
-        feature_3: {{type_timestamp()}}
+        feature_1: int
+        feature_2: string
+        feature_3: timestamp
 ```
+
+**Note: It is highly recommended to use the first option, as it better supports with cross-database functionality.**
 </br></br>
 
 
