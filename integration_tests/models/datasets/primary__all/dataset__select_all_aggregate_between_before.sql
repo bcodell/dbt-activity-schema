@@ -5,12 +5,12 @@ select all visited_page (
     entity_uuid as customer_id,
     ts as visited_page_at
 )
-append first between_before visited_page (
-    referrer_url as first_between_before_referrer_url
+aggregate between_before visited_page (
+    first_value(referrer_url) as first_between_before_referrer_url
 )
-append first between_before bought_something(
-    total_items_purchased as first_between_before_total_items_purchased,
-    ts as first_between_before_bought_something_at
+aggregate between_before bought_something(
+    sum(total_items_purchased) as total_items_purchased_between_before,
+    last_value(previous_activity_occurred_at) as penultimate_bought_something_at_between_before
 )
 {% endset %}
 

@@ -29,7 +29,7 @@
 {%- set previous_ts = dbt_aql.schema_columns().previous_activity_occurrence_at -%}
 {%- set activity_occurrence = dbt_aql.schema_columns().activity_occurrence -%}
 {%- set req = dbt_aql._required_prefix() -%}
-{{dbt_aql.primary()}}.{{req}}{{ts}} > {{dbt_aql.joined()}}.{{ts}} and ({{dbt_aql.primary()}}.{{req}}{{previous_ts}} > {{dbt_aql.joined()}}.{{ts}} or {{dbt_aql.primary()}}.{{req}}{{activity_occurrence}} is null)
+{{dbt_aql.primary()}}.{{req}}{{ts}} > {{dbt_aql.joined()}}.{{ts}} and ({{dbt_aql.primary()}}.{{req}}{{previous_ts}} < {{dbt_aql.joined()}}.{{ts}} or {{dbt_aql.primary()}}.{{req}}{{activity_occurrence}} = 1)
 {%- endmacro %}
 
 {% macro _join_clause_all() %}
