@@ -569,7 +569,7 @@ For developers who would like to contribute to this project, follow the instruct
 ## Setup
 ### General Setup
 1. Fork the repository and clone the forked version
-2. Install poetry ([official installer](https://python-poetry.org/docs/#installing-with-the-official-installer))
+2. Install poetry ([official installer](https://python-poetry.org/docs/#installing-with-the-official-installer) - version 1.6.1 is recommended as that is what is used in CI)
 3. Set the repo as the working directory
 4. Run `poetry init` to install dependencies
 5. Activate a virtual environment if not activated by default from previous step (`poetry shell`)
