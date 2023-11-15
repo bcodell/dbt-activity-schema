@@ -563,3 +563,37 @@ Placeholder. Documentation coming soon.
 ## **Overriding the `listagg` Aggregation Function Default Delimiter**
 Placeholder. Documentation coming soon.
 
+# Contributing
+For developers who would like to contribute to this project, follow the instructions below to set up your development environment.
+
+## Setup
+### General Setup
+1. Fork the repository and clone the forked version
+2. Install poetry ([official installer](https://python-poetry.org/docs/#installing-with-the-official-installer))
+3. Set the repo as the working directory
+4. Run `poetry init` to install dependencies
+5. Activate a virtual environment if not activated by default from previous step (`poetry shell`)
+6. Set the working directory to `dbt-aql/integration_tests` and run `dbt deps`
+
+### Postgres Setup
+1. Install Postgres (`brew install postgresql@15` or similar version for MacOS/Homebrew, or [download the Postgres App](https://postgresapp.com/downloads.html))
+2. Start Postgres on port 5432 (should be default - `brew services start postgresql@15` if using Homebrew)
+3. Create a database called `dbt_aql_integration_tests`
+
+### Bigquery Setup
+1. Create a GCP account if you don't have one already
+2. Create a Bigquery project if you don't have one already
+3. Create a Bigquery service account if you don't have one already
+4. Obtain a JSON keyfile for the service account and save it at the path `dbt-aql/integration_tests/gcp_keyfile.json`
+5. Add the environment variable `GCP_KEYFILE_PATH=./gcp_keyfile.json`
+
+## Testing
+1. After making contributions, add dbt models and corresponding dbt tests in the `integration_tests` subdirectory that validate the new functionality works as expected. Add tests to capture edge cases to the best of your ability. In general, for each test case, the following artifacts need to be created:
+    * a dbt model
+    * a dbt seed csv file that contains the expected output for the dbt model
+    * a `dbt_utils.equality` test comparing the model and the csv file
+2. To validate that everything works, set `integration_tests` as the working directory, and run `dbt build --target <target_name>`, where `<target_name>` represents one of the targets defined in `integration_tests/profiles.yml`, and each target corresponds to a different database type. Valid options are:
+    * `duckdb` (default)
+    * `bigquery`
+    * `postgres`
+3. Be sure to follow the database-specific setup instructions above to test appropriately
