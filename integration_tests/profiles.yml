@@ -29,4 +29,20 @@ integration_tests:
       keyfile: "{{ env_var('GCP_KEYFILE_PATH') }}"
       OPTIONAL_CONFIG: VALUE
 
+    snowflake:
+      type: snowflake
+      account: test
+      host: snowflake.localhost.localstack.cloud
+
+      # User/password auth
+      user: test
+      password: test
+
+      role: test
+      database: test
+      warehouse: test
+      schema: test
+      threads: 1
+      client_session_keep_alive: False
+
   target: duckdb
