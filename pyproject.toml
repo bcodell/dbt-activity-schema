@@ -1,10 +1,13 @@
 [tool.poetry]
 name = "dbt-aql"
-version = "0.1.5"
+version = "0.1.8"
 description = "A dbt package to query Activity Streams using a SQL-esque interface."
 authors = ["Bryce Codell <bryce.codell@24analytics.co"]
 license = "GNU"
 readme = "README.md"
+packages = [
+    {include = "dbt-aql"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
