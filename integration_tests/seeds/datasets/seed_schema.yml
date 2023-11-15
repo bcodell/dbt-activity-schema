@@ -17,7 +17,7 @@ seeds:
   - name: output__select_all_append_nth_before
     config:
       column_types:
-        first_before_referrer_url: string
+        first_before_referrer_url: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
         second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
         
   - name: output__select_first_append_first_before
@@ -35,7 +35,7 @@ seeds:
   - name: output__select_first_append_nth_before
     config:
       column_types:
-        first_before_referrer_url: string
+        first_before_referrer_url: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
         second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
         
   - name: output__select_last_append_first_before
@@ -53,7 +53,7 @@ seeds:
   - name: output__select_last_append_nth_before
     config:
       column_types:
-        first_before_referrer_url: string
+        first_before_referrer_url: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
         second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
         
   - name: output__select_nth_append_first_before
@@ -71,6 +71,6 @@ seeds:
   - name: output__select_nth_append_nth_before
     config:
       column_types:
-        first_before_referrer_url: string
+        first_before_referrer_url: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
         second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
         

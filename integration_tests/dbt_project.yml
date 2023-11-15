@@ -37,7 +37,7 @@ seeds:
   dbt_aql_integration_tests:
     datasets:
       +column_types:
-        customer_id: string
+        customer_id: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
 
 dispatch:
   - macro_namespace: dbt
