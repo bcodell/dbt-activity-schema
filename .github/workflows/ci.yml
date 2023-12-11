@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GCP_KEYFILE: ${{ secrets.GCP_KEYFILE }}
-      localstack_api_key: ${{ secrets.LOCALSTACK_API_KEY }}
+      LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
 
     steps:
       - name: Checkout Branch
