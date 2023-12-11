@@ -39,6 +39,7 @@ jobs:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - snowflake
+        id: snowflake_ci
         run: |
           localstack extensions install localstack-extension-snowflake
           localstack start -d
@@ -48,7 +49,7 @@ jobs:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
           DEBUG: 1
       - name: localstack logs
-        if: always()
+        if: failure() && steps.snowflake_ci.outcome == 'failure'
         run: localstack logs
       - name: dbt CI - bigquery
         run: |
