@@ -35,6 +35,8 @@ jobs:
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
+      - name: dbt CI - snowflake
+        run: dbt build -x --target snowflake
       - name: dbt CI - bigquery
         run: |
           cd ./integration_tests
