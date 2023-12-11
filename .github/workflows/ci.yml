@@ -44,6 +44,8 @@ jobs:
           localstack extensions install localstack-extension-snowflake
           cd ./integration_tests
           dbt build -x --target snowflake
+        env:
+          DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - bigquery
         run: |
           cd ./integration_tests
