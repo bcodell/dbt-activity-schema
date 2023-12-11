@@ -42,6 +42,8 @@ jobs:
         run: |
           localstack start -d
           localstack extensions install localstack-extension-snowflake
+          localstack extensions uninstall localstack-extension-snowflake
+          localstack extensions install localstack-extension-snowflake
           cd ./integration_tests
           dbt build -x --target snowflake
         env:
