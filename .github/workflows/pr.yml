@@ -8,3 +8,4 @@ jobs:
     uses: ./.github/workflows/ci.yml
     secrets:
       gcp_keyfile: ${{ secrets.GCP_KEYFILE }}
+      localstack_api_key: ${{ secrets.LOCALSTACK_API_KEY }}
