@@ -1,18 +1,14 @@
 {% macro customer_column(stream) %}
-{% if execute %}
-    {%- set customer_alias = var("dbt_aql").get("streams").get(stream).get("customer_id_alias", none) -%}
-    {%- if customer_alias is none -%}
-        {%- set error_message -%}
-    Configuration for stream '{{stream}}' does not include required alias for customer ID column.
-    Please add `customer_id_alias` in your dbt_project.yml configuration for stream '{{stream}}'
-        {%- endset -%}
-        {{ exceptions.warn(error_message) }}
-    {%- else -%}
-        {%- do return(customer_alias) -%}
-    {%- endif -%}
-{% else %}
-    {%- do return("customer") -%}
-{% endif %}
+{%- set customer_alias = var("dbt_aql").get("streams", {}).get(stream, {}).get("customer_id_alias", none) -%}
+{%- if customer_alias is none -%}
+    {%- set error_message -%}
+Configuration for stream '{{stream}}' does not include required alias for customer ID column.
+Please add `customer_id_alias` in your dbt_project.yml configuration for stream '{{stream}}'
+    {%- endset -%}
+    {{ exceptions.warn(error_message) }}
+{%- else -%}
+    {%- do return(customer_alias) -%}
+{%- endif -%}
 {% endmacro %}
 
 
