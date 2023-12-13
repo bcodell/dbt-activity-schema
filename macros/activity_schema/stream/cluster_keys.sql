@@ -27,6 +27,7 @@
 {% macro bigquery__cluster_keys() %}
 {%- set columns = dbt_aql.schema_columns() -%}
 {# assumes that macro is only used in stream models #}
+{%- set stream = model.name -%}
 {%- set cluster_cols = [
     columns.activity,
     columns.activity_occurrence,
