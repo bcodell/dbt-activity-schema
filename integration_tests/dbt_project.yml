@@ -29,6 +29,7 @@ vars:
         feature_json: attributes
     streams:
       customer_stream:
+        skip_stream: false
         customer_id_alias: entity_uuid
         anonymous_customer_id_alias: anonymous_entity_uuid
         model_prefix: customer__
