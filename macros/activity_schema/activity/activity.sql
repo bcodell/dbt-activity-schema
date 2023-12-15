@@ -29,9 +29,17 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Parsed invalid re
 {%- else -%}
     {%- set relationship_clause = none -%}
 {%- endif -%}
+{%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
+{%- if modules.re.search(model_prefix, activity_name) is none -%}
+    {%- set model_name = model_prefix~activity_name -%}
+{%- else -%}
+    {%- set model_name = activity_name -%}
+{%- endif -%}
+
 
 {%- do return(namespace(
     name="activity",
+    model_name=model_name,
     verb=verb,
     relationship_selector=relationship_selector,
     join_condition=join_condition,
