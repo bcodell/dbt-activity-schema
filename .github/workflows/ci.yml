@@ -73,18 +73,10 @@ jobs:
       - name: localstack logs
         if: failure() && (steps.snowflake_ci_with_stream.outcome == 'failure' || steps.snowflake_ci_skip_stream.outcome == 'failure' )
         run: localstack logs
-      - name: dbt CI - bigquery
-        run: |
-          cd ./integration_tests
-          echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
-          ls -l
-          dbt build -x --target bigquery
-        env:
-          GCP_KEYFILE_PATH: ./gcp_keyfile.json
-          DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - bigquery - with stream
         run: |
           cd ./integration_tests
+          sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
           echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
           ls -l
           dbt build -x --target bigquery
@@ -94,6 +86,7 @@ jobs:
       - name: dbt CI - bigquery - skip stream
         run: |
           cd ./integration_tests
+          sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml
           echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
           ls -l
           dbt build -x --target bigquery
