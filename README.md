@@ -100,6 +100,12 @@ _Description_: This variable takes a string that represents the alias that will 
 _Required_: Yes
 </br></br>
 
+#### **`skip_stream`**
+_Description_: This variable accepts a boolean `true` or `false`. When `true`, the downstream affects are that the `build_stream` macro renders an empty table, and the `dataset` macro queries individual activity tables directly instead of querying the stream.
+
+_Required_: No (defaults to `false`)
+</br></br>
+
 #### **`anonymous_customer_id_alias`**
 _Description_: This variable takes a string that represents the alias that will be used in lieu of the standard `anonymous_customer_id` column in the Activity Schema spec, which represents the anonymous ID of the entity represented by the stream. 
 > **Note: This is an optional column according to the Activity Schema v2 Spec. If this variable is excluded, then the Activity and Activity Stream models for the corresponding Activity Schema will exclude `anonymous_customer_id` as a column.**
@@ -151,6 +157,42 @@ models:
 ```
 
 **Note: It is highly recommended to use the first option, as it better supports with cross-database functionality.**
+
+### Additional Configuration - Skipping Activity Stream
+If the Activity Schema being built is configured to skip the activity stream, then each activity table should be appropriately clustered/partitioned. A convenience macro called `cluster_keys` is provided by this package to simplify this process. Example implementations of this configuration for supported warehouses are provided below - keep in mind that the previously referenced config parameters (`stream`, `data_types`) are still required:
+```sql
+-- Snowflake
+{{
+    config(
+        cluster_by=dbt_aql.cluster_keys()
+    )
+}}
+
+-- Bigquery
+{{
+    config(
+        partition_by=dbt_aql.cluster_keys('stream_name').partition_by,
+        cluster_by=dbt_aql.cluster_keys('stream_name').cluster_by
+    )
+}}
+
+-- Redshift
+{{
+    config(
+        sort=dbt_aql.cluster_keys().sort,
+        dist=dbt_aql.cluster_keys().dist
+    )
+}}
+
+-- DuckDB
+{{
+    config(
+        options={"partition_by": dbt_aql.cluster_keys()}
+    )
+}}
+```
+
+**Note: The `cluster_keys` macro requires the name of the activity's associated stream to be passed as an input argument only when using Bigquery.**
 </br></br>
 
 
@@ -214,6 +256,8 @@ For each activity the macro will generate a model entry in yaml format containin
 # **Streams**
 Each Activity Schema should have exactly 1 stream model. The model should be the name of the stream that is registered in the `streams` variable in `dbt_project.yml`.
 
+**Note: This model must exist with activity model dependencies defined appropriately, regardless of how the `skip_stream` parameter is configured for the stream. This requirement is due to the way dbt determines model dependencies when parsing a project.**
+
 ## **Configuration**
 In order to maximize computational performance when querying a stream in downstream models, it is recommended to use the clustering/partition keys as recommended by the spec. A convenience macro has been provided with adapter-specific implementations to make this easy for users. To use, simply pass the `dbt_aql.cluster_keys()` to the appropriate argument in the model config block.
 
@@ -264,6 +308,8 @@ Each Activity model should look similar to the following:
 ) }}
 ```
 The `build_stream` macro is a convenience function that takes as input a list of `ref`'d activity models and creates a unioned representation of them. If this model's materialization is specified as incremental, then for each activity, it will only insert rows with a `ts` value greater than the maximum `ts` value in the stream table for that activity.
+
+**Note: When `skip_stream` is configured as `true` for the stream, this macro produces an empty table.**
 </br></br>
 
 # **Creating Datasets: Querying The Activity Stream with `aql`**
