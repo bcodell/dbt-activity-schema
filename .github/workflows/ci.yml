@@ -34,7 +34,7 @@ jobs:
       - name: dbt CI - duckdb - with stream
         run: |
           cd ./integration_tests
-          sed -i '' 's/skip_stream: true/skip_stream: false/' dbt_project.yml
+          sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
           dbt build -x --target duckdb
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
@@ -42,7 +42,7 @@ jobs:
       - name: dbt CI - duckdb - skip stream
         run: |
           cd ./integration_tests
-          sed -i '' 's/skip_stream: false/skip_stream: true/' dbt_project.yml
+          sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml
           dbt build -x --target duckdb
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
@@ -53,7 +53,7 @@ jobs:
           localstack extensions install localstack-extension-snowflake
           localstack start -d
           cd ./integration_tests
-          sed -i '' 's/skip_stream: true/skip_stream: false/' dbt_project.yml
+          sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
           dbt build -x --target snowflake
         env:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
@@ -65,7 +65,7 @@ jobs:
           localstack stop
           localstack start -d
           cd ./integration_tests
-          sed -i '' 's/skip_stream: false/skip_stream: true/' dbt_project.yml
+          sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml
           dbt build -x --target snowflake
         env:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
