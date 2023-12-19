@@ -21,18 +21,19 @@
   {% do yaml_output.append('  - name: ' ~ activity) %}
   {% do yaml_output.append('    columns:') %}
 
-  {% set columns = [
-      {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': 'STRING', 'tests': ['unique', 'not_null']},
-      {'name': 'customer_id', 'description': 'Identifier for the customer.', 'data_type': 'STRING'},
-      {'name': 'activity', 'description': 'Type of activity performed by the customer.', 'data_type': 'STRING', 'tests': ['not_null']},
-      {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': 'TIMESTAMP', 'tests': ['not_null']},
-      {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': 'INT64'},
-      {'name': 'link', 'description': 'Link associated with the activity, if applicable.', 'data_type': 'STRING'},
-      {'name': 'feature_json', 'description': 'JSON containing additional feature data related to the activity. Contains the following items:', 'data_type': 'JSON'},
-      {'name': 'activity_occurrence', 'description': 'Number of times the activity occurred.', 'data_type': 'INT64'},
-      {'name': 'activity_repeated_at', 'description': 'Timestamp of when the activity was repeated, if applicable.', 'data_type': 'TIMESTAMP'}
-    ]
-  %}
+{% set columns = [
+    {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
+    {'name': 'customer_id', 'description': 'Identifier for the customer.', 'data_type': type_string()},
+    {'name': 'activity', 'description': 'Type of activity performed by the customer.', 'data_type': type_string(), 'tests': ['not_null']},
+    {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
+    {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': type_int()},
+    {'name': 'link', 'description': 'Link associated with the activity, if applicable.', 'data_type': type_string()},
+    {'name': 'feature_json', 'description': 'JSON containing additional feature data related to the activity. Contains the following items:', 'data_type': dbt_aql.type_json()},
+    {'name': 'activity_occurrence', 'description': 'Number of times the activity occurred.', 'data_type': type_int()},
+    {'name': 'activity_repeated_at', 'description': 'Timestamp of when the activity was repeated, if applicable.', 'data_type': type_timestamp()}
+]
+%}
+
 
     -- Check for anonymous_customer_column
   {% set stream = get_activity_config(activity).stream %}
