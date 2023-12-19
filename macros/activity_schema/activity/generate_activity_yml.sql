@@ -23,8 +23,8 @@
 
 {% set columns = [
     {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
-    {'name': 'customer_id', 'description': 'Identifier for the customer.', 'data_type': type_string()},
-    {'name': 'activity', 'description': 'Type of activity performed by the customer.', 'data_type': type_string(), 'tests': ['not_null']},
+    {'name': 'customer_id', 'description': 'Identifier for the entity.', 'data_type': type_string()},
+    {'name': 'activity', 'description': 'Type of activity performed.', 'data_type': type_string(), 'tests': ['not_null']},
     {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
     {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': type_int()},
     {'name': 'link', 'description': 'Link associated with the activity, if applicable.', 'data_type': type_string()},
@@ -38,7 +38,7 @@
     -- Check for anonymous_customer_column
   {% set stream = get_activity_config(activity).stream %}
   {%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
-      {%- do columns.insert(2, {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the customer.', 'data_type': 'STRING', 'tests': ['not_null']}) -%}
+      {%- do columns.insert(2, {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': 'STRING', 'tests': ['not_null']}) -%}
   {%- endif -%}
 
   {% for column in columns %}
