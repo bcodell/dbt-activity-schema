@@ -32,7 +32,9 @@ Accepted values are one of {{accepted_values_str}}, but received '{{nc}}'
 
 
 {%- set columns = dbt_aql.schema_columns() -%}
+{%- if execute -%}
 {%- do columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
+{%- endif -%}
 {%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
     {%- do columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(stream)}) -%}
 {%- endif -%}

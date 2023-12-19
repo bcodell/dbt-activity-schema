@@ -8,9 +8,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-dbt-duckdb = "~1.6"
-dbt-postgres = "~1.6"
-dbt-bigquery = "~1.6"
+dbt-duckdb = "~1.7"
+dbt-postgres = "~1.7"
+dbt-bigquery = "~1.7"
+localstack = "~3.0"
+dbt-snowflake = "~1.7"
 
 [build-system]
 requires = ["poetry-core"]

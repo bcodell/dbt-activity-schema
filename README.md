@@ -1,6 +1,13 @@
 # **dbt-aql**
 A dbt package to query Activity Streams using a SQL-esque interface called `aql` - Activity Query Language. In addition to a proposed implementation of aql, it contains myriad utility functions to empower users to build entire Activity Schema data pipelines in their dbt projects.
 
+# Sponsors
+
+Big thanks to [LocalStack](https://localstack.cloud) for providing PRO licenses to the development team! Their support enables compatibility testing for Snowflake in this project's CI suite.
+
+<a href="https://localstack.cloud"><img src="https://user-images.githubusercontent.com/47351025/215054012-f5af0761-0bd5-49c6-bd3e-c6b2a6844f53.png" height="100" /></a>
+
+
 # **Motivation**
 After contributing to multiple dbt projects that support Activity Schema modeling in dbt, it became apparent that a macro-based UX for generating ad hoc datasets from Activity Stream tables for analysis development left a lot to be desired. This project exists for two reasons - to make it easier to operate an Activity Schema, and to offer a preliminary proposal for a standard method for deriving datasets from stream-like tables.
 
