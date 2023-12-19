@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-aql"
-version = "0.1.8"
+version = "0.2.0"
 description = "A dbt package to query Activity Streams using a SQL-esque interface."
 authors = ["Bryce Codell <bryce.codell@24analytics.co"]
 license = "GNU"
@@ -13,6 +13,7 @@ dbt-postgres = "~1.7"
 dbt-bigquery = "~1.7"
 localstack = "~3.0"
 dbt-snowflake = "~1.7"
+cryptography = ">=41.0.7"
 
 [build-system]
 requires = ["poetry-core"]
