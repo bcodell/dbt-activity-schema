@@ -1,11 +1,11 @@
 -- Get data_types object from model config block
 {% macro get_activity_config(model) -%}
-    {% set relation = ref(model) %}
-    {% for node in graph.nodes.values()
-        | selectattr("resource_type", "equalto", "model")
-        | selectattr("name", "equalto", relation.identifier) %}
-        {% do return(node.config) %}
-    {% endfor %}
+  {% set relation = ref(model) %}
+  {% for node in graph.nodes.values()
+      | selectattr("resource_type", "equalto", "model")
+      | selectattr("name", "equalto", relation.identifier) %}
+    {% do return(node.config) %}
+  {% endfor %}
 {%- endmacro %}
 
 -- Get column descriptions and tests
@@ -16,17 +16,17 @@
   {% set anonymous_customer_column = dbt_aql.anonymous_customer_column(stream) %}
 
   {% set columns = [
-        {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
-        {'name': 'customer_id', 'description': 'Identifier for the entity.', 'data_type': type_string()},
-        {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string(), 'tests': ['not_null']}, 
-        {'name': 'activity', 'description': 'Type of activity performed.', 'data_type': type_string(), 'tests': ['not_null']},
-        {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
-        {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': type_int()},
-        {'name': 'link', 'description': 'Link associated with the activity, if applicable.', 'data_type': type_string()},
-        {'name': 'feature_json', 'description': 'JSON containing additional feature data related to the activity. Contains the following items:', 'data_type': dbt_aql.type_json()},
-        {'name': 'activity_occurrence', 'description': 'Number of times the activity occurred.', 'data_type': type_int()},
-        {'name': 'activity_repeated_at', 'description': 'Timestamp of when the activity was repeated, if applicable.', 'data_type': type_timestamp()}
-    ] %}
+      {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
+      {'name': 'customer_id', 'description': 'Identifier for the entity.', 'data_type': type_string()},
+      {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string(), 'tests': ['not_null']},
+      {'name': 'activity', 'description': 'Type of activity performed.', 'data_type': type_string(), 'tests': ['not_null']},
+      {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
+      {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': type_int()},
+      {'name': 'link', 'description': 'Link associated with the activity, if applicable.', 'data_type': type_string()},
+      {'name': 'feature_json', 'description': 'JSON containing additional feature data related to the activity. Contains the following items:', 'data_type': dbt_aql.type_json()},
+      {'name': 'activity_occurrence', 'description': 'Number of times the activity occurred.', 'data_type': type_int()},
+      {'name': 'activity_repeated_at', 'description': 'Timestamp of when the activity was repeated, if applicable.', 'data_type': type_timestamp()}
+  ] %}
 
   -- Remove unused columns
   {%- if anonymous_customer_column is none -%}
