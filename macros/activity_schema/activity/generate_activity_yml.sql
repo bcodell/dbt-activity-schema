@@ -9,7 +9,7 @@
 {%- endmacro %}
 
 -- Get column descriptions and tests
-{% macro generate_columns(activity) %}
+{% macro get_column_descriptions(activity) %}
   {% set stream = get_activity_config(activity).stream %}
   {% set schema_columns = dbt_aql.schema_columns() %}
   {% set customer_column = dbt_aql.customer_column(stream) %}
@@ -62,7 +62,7 @@
 
 -- Loop through each activity
 {% for activity in activities %}
-  {% set columns = generate_columns(activity) %}
+  {% set columns = get_column_descriptions(activity) %}
 
   {% do yaml_output.append('  - name: ' ~ activity) %}
   {% do yaml_output.append('    columns:') %}
