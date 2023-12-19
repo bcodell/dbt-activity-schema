@@ -51,6 +51,7 @@
       {% for key, data_type in data_types.items() %}
         {% do yaml_output.append('            - ' ~ key ~ ': ' ~ data_type) %}
       {% endfor %}
+      {% do yaml_output.append('        data_type: ' ~ column['data_type']) %}
     {% else %}
       {% do yaml_output.append('        description: "' ~ column['description'] ~ '"') %}
       {% do yaml_output.append('        data_type: ' ~ column['data_type']) %}
