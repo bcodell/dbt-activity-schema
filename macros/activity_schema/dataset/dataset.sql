@@ -8,6 +8,7 @@
 {%- set jc = dbt_aql._join_conditions() -%}
 {%- set parsed_query = dbt_aql.parse_aql(aql) -%}
 {%- set stream = parsed_query.stream -%}
+{%- set skip_stream = var("dbt_aql").get("streams", {}).get(stream, {}).get("skip_stream", false) | as_bool -%}
 {%- set columns = dbt_aql.schema_columns() -%}
 {%- do columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
 {%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
@@ -31,6 +32,12 @@
 {% endfor %}
 
 -- depends_on: {{ ref(stream) }}
+-- depends_on: {{ ref(primary_activity.model_name) }}
+
+{% for ja in joined_activities %}
+-- depends_on: {{ ref(ja.model_name) }}
+{% endfor %}
+
 {% for ic in included_columns %}
     {% set ic_stripped = ic.strip() %}
     {% if modules.re.search(model_prefix, ic_stripped) is none %}
@@ -40,6 +47,7 @@
 -- depends_on: {{ ref(ic_stripped) }}
     {% endif %}
 {% endfor %}
+
 
 {% set stream_relation = ref(stream) %}
 
@@ -94,8 +102,15 @@ with
             partition by {{primary}}.{{columns.customer}}
             order by {{primary}}.{{columns.ts}}, {{primary}}.{{columns.activity_id}}
         ) as {{columns.activity_repeated_at}}
+    {% if not skip_stream %}
     from {{ stream_relation }} {{primary}}
-    where {{primary}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, primary_activity.activity_name)}}
+    {% else %}
+    from {{ ref(primary_activity.model_name) }} {{primary}}
+    {% endif %}
+    where true
+        {% if not skip_stream %}
+        and {{primary}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, primary_activity.activity_name)}}
+        {% endif %}
         {% for f in primary_activity.filters %}
         {%- set f_formatted = f.format(primary=primary, joined=joined, **columns) %}
         and {{f_formatted}}
@@ -113,11 +128,16 @@ with
         {%- for column in primary_activity.columns %}
         {{ dbt_aql.select_column(stream, primary, column).column_sql }} as {{column.alias}}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}
-    from {% if primary_activity.filters is none %}{{ stream_relation }}{% else %}{{primary_activity_alias}}{{fs}}{% endif %} as {{primary}}
-    where {{primary}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, primary_activity.activity_name)}}
+    from {% if primary_activity.filters is none %}{% if not skip_stream %}{{ stream_relation }}{% else %}{{ ref(primary_activity.model_name) }}{% endif %}{% else %}{{primary_activity_alias}}{{fs}}{% endif %} as {{primary}}
+    where true
+        {% if not skip_stream %}
+        and {{primary}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, primary_activity.activity_name)}}
+        {% endif %}
         and {{ primary_activity.relationship_clause }}
 ){% if joined_activities|length > 0 %},{% endif %}
 {% for ja in joined_activities %}
+
+{# cte below only applies to filtered append activities since activity occurrence and next activity need to be recomputed for use in the join #}
 {% if ja.filters is not none and ja.verb == av.append %}
 {{dbt_aql.alias_activity(ja, loop.index)}}{{fs}} as (
     select
@@ -134,8 +154,15 @@ with
             partition by {{joined}}.{{columns.customer}}
             order by {{joined}}.{{columns.ts}}, {{joined}}.{{columns.activity_id}}
         ) as {{columns.activity_repeated_at}}
+    {% if not skip_stream %}
     from {{ stream_relation }} {{joined}}
-    where {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+    {% else %}
+    from {{ ref(ja.model_name) }} {{joined}}
+    {% endif %}
+    where true
+        {% if not skip_stream %}
+        and {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+        {% endif %}
         {% for f in ja.filters %}
         {%- set f_formatted = f.format(primary=primary, joined=joined, **columns) %}
         and {{f_formatted}}
@@ -151,9 +178,12 @@ with
         {{ column.aggfunc(parsed_col) }} as {{ column.alias }}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}
     from {{primary_activity_alias}} as {{primary}}
-    left join {% if ja.filters is not none and ja.verb == av.append %}{{dbt_aql.alias_activity(ja, loop.index)}}{{fs}}{% else %}{{ stream_relation }}{% endif %} {{joined}}
+    left join {% if ja.filters is not none and ja.verb == av.append %}{{dbt_aql.alias_activity(ja, loop.index)}}{{fs}}{% else %}{% if not skip_stream %}{{ stream_relation }}{% else %}{{ ref(ja.model_name) }}{% endif %}{% endif %} {{joined}}
         -- filter joined activity first to improve query performance
-        on {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+        on true
+        {% if not skip_stream %}
+        and {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+        {% endif %}
         {%- if ja.relationship_clause is not none %}
         and {{ ja.relationship_clause }}
         {%- endif %}
@@ -180,7 +210,11 @@ with
             {%- set parsed_col = dbt_aql.select_column(stream, joined, column) -%}
             {{ column.aggfunc(parsed_col) }} as {{ column.alias }}{% if not loop.last %},{% endif %}
         {%- endfor %}
+    {% if not skip_stream %}
     from {{ ref(stream) }} {{joined}}
+    {% else %}
+    from {{ ref(ja.model_name) }} {{joined}}
+    {% endif %}
     where {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
     {% if ja.filters is not none %}
         {%- for f in ja.filters %}
