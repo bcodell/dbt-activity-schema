@@ -15,9 +15,15 @@
   {% set customer_column = dbt_aql.customer_column(stream) %}
   {% set anonymous_customer_column = dbt_aql.anonymous_customer_column(stream) %}
 
+  -- Add customer key alias
+  {%- if customer_column is not none -%}
+    {% do schema_columns.update({'customer': customer_column}) %}
+  {%- endif -%}
+
+
   {% set columns = [
       {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
-      {'name': 'customer_id', 'description': 'Identifier for the entity.', 'data_type': type_string()},
+      {'name': 'customer', 'description': 'Identifier for the entity.', 'data_type': type_string()},
       {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string(), 'tests': ['not_null']},
       {'name': 'activity', 'description': 'Type of activity performed.', 'data_type': type_string(), 'tests': ['not_null']},
       {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
