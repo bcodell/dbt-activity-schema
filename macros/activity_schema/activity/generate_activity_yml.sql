@@ -15,6 +15,11 @@
   {% set customer_column = dbt_aql.customer_column(stream) %}
   {% set anonymous_customer_column = dbt_aql.anonymous_customer_column(stream) %}
 
+  -- Add anonymous_customer_id key if specified
+  {%- if anonymous_customer_column is not none -%}
+    {% do schema_columns.update({'anonymous_customer_id': anonymous_customer_column}) %}
+  {%- endif -%}
+
   -- Add customer key alias
   {%- if customer_column is not none -%}
     {% do schema_columns.update({'customer': customer_column}) %}
