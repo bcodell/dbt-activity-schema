@@ -28,5 +28,5 @@
 {% endmacro %}
 
 {% macro bigquery__type_json() %}
-{%- do return("struct") -%}
+{%- do return("json") -%}
 {% endmacro %}
