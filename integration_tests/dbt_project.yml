@@ -34,11 +34,6 @@ vars:
         anonymous_customer_id_alias: anonymous_entity_uuid
         model_prefix: customer__
 
-quoting:
-  database: "{{ true if target.name == 'snowflake' else false }}"
-  schema: "{{ true if target.name == 'snowflake' else false }}"
-  identifier: "{{ true if target.name == 'snowflake' else false }}"
-
 
 seeds:
   dbt_aql_integration_tests:
