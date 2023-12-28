@@ -11,17 +11,8 @@
 
 {%- set skip_stream = var("dbt_aql").get("streams", {}).get(model.name, {}).get("skip_stream", false) | as_bool -%}
 
-{%- set columns = dbt_aql.schema_columns() -%}
-{%- set schema_column_types = dbt_aql.schema_column_types() -%}
-
-{%- do columns.update({"customer": dbt_aql.customer_column(model.name)}) -%}
-{%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
-    {%- do columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(model.name)}) -%}
-{%- endif -%}
-{%- set anonymous = dbt_aql.anonymous_customer_column(model.name) -%}
-{%- if anonymous is not none -%}
-    {%- do columns.update({"anonymous_customer_id": anonymous}) -%}
-{%- endif -%}
+{%- set columns = dbt_aql.schema_columns(model.name) -%}
+{%- set schema_column_types = dbt_aql.schema_column_types(model.name) -%}
 
 {% if not skip_stream %}
 {% for activity in activity_list %}

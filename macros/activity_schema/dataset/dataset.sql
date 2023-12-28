@@ -9,11 +9,7 @@
 {%- set parsed_query = dbt_aql.parse_aql(aql) -%}
 {%- set stream = parsed_query.stream -%}
 {%- set skip_stream = var("dbt_aql").get("streams", {}).get(stream, {}).get("skip_stream", false) | as_bool -%}
-{%- set columns = dbt_aql.schema_columns() -%}
-{%- do columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
-{%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
-    {%- do columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(stream)}) -%}
-{%- endif -%}
+{%- set columns = dbt_aql.schema_columns(stream) -%}
 {%- set primary_activity = parsed_query.primary_activity -%}
 {%- set primary_activity_alias = dbt_aql.alias_activity(primary_activity, 1) -%}
 {%- set primary = dbt_aql.primary() -%}
