@@ -1,6 +1,8 @@
 name: CI
 on:
   workflow_call:
+    paths-ignore:
+      - 'README.md'
     secrets:
       gcp_keyfile:
         required: true

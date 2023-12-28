@@ -17,8 +17,8 @@ Please add `customer_id_alias` in your dbt_project.yml configuration for stream 
 {% endmacro %}
 
 
-{% macro schema_columns() %}
-
+{% macro schema_columns(stream=none) %}
+{# returns a dict where each key is the standard activity schema column name and each value is the alias configured #}
 {%- set required_columns = dict(
     activity_id = "activity_id",
     ts = "ts",
@@ -66,13 +66,20 @@ to alias are '{{required_columns.keys()}}'
 
 {%- do required_columns.update(stream_aliases) -%}
 
+{%- if stream is not none -%}
+    {%- do required_columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
+    {%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
+        {%- do required_columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(stream)}) -%}
+    {%- endif -%}
+{%- endif -%}
 {%- do return(required_columns) -%}
 
 {% endmacro %}
 
 
-{% macro schema_column_types () %}
-{%- set columns = dbt_aql.schema_columns() -%}
+{% macro schema_column_types(stream=none) %}
+{# returns a dict where each key is the alias of the activity schema column and each value is the corresponding data type #}
+{%- set columns = dbt_aql.schema_columns(stream) -%}
 {%- set column_types = {
     columns.activity_id: dbt.type_string(),
     columns.ts: dbt.type_timestamp(),
@@ -84,8 +91,18 @@ to alias are '{{required_columns.keys()}}'
 {%- if "revenue_impact" in columns.keys() -%}
     {%- do column_types.update({columns.revenue_impact: dbt.type_int()}) -%}
 {%- endif -%}
-{%- if "link" in columns.keys() -%}
+{%- if "link" in columns.keys()  -%}
     {%- do column_types.update({columns.link: dbt.type_string()}) -%}
+{%- endif -%}
+{%- if stream is not none -%}
+    {%- set customer_col = dbt_aql.customer_column(stream) -%}
+    {%- do column_types.update({customer_col: dbt.type_string()}) -%}
+    {%- if columns.anonymous_customer_id is defined -%}
+        {%- do column_types.update({columns.anonymous_customer_id: dbt.type_string()}) -%}
+    {%- endif -%}
+{%- else -%}
+    {%- do column_types.update({"customer": dbt.type_string()}) -%}
+    {%- do column_types.update({"anonymous_customer_id": dbt.type_string()}) -%}
 {%- endif -%}
 {%- do return(column_types) -%}
 {% endmacro %}

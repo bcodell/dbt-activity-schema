@@ -3,15 +3,7 @@
 {% endmacro %}
 
 {% macro default__select_column(stream, table_alias, column) %}
-{%- set columns = dbt_aql.schema_columns() -%}
-{%- do columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
-{%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
-    {%- do columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(stream)}) -%}
-{%- endif -%}
-{%- set anonymous = dbt_aql.anonymous_customer_column(stream) -%}
-{%- if anonymous is not none -%}
-    {%- do columns.update({"anonymous_customer_id": anonymous}) -%}
-{%- endif -%}
+{%- set columns = dbt_aql.schema_columns(stream) -%}
 
 {%- if column.column_name not in columns.values() -%}
 {%- set column_sql -%}
@@ -22,7 +14,7 @@ cast(nullif({{dbt_aql.json_extract(table_alias ~ '.' ~ columns.feature_json, col
 {%- set column_sql -%}
 {{table_alias}}.{{column.column_name}}
 {%- endset -%}
-{%- set data_type = dbt_aql.schema_column_types().get(column.column_name, dbt.type_string()) -%}
+{%- set data_type = dbt_aql.schema_column_types(stream).get(column.column_name, dbt.type_string()) -%}
 {%- endif -%}
 {%- do return(namespace(
     name="selected_column",
