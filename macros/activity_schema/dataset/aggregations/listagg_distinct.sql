@@ -11,7 +11,7 @@ nullif(string_agg(distinct {{ column.column_sql }}, {{dbt_aql.listagg_delimiter(
 {% endmacro %}
 
 {% macro snowflake__aggfunc_listagg_distinct(column) %}
-nullif(listagg(distinct {{ column.column_sql }}, {{dbt_aql.listagg_delimiter()}}), '')
+nullif(listagg(distinct {{ column.column_sql }}, {{dbt_aql.listagg_delimiter()}}) within group (order by {{ column.column_sql }}), '')
 {% endmacro %}
 
 {% macro redshift__aggfunc_listagg_distinct(column) %}
