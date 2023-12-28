@@ -24,4 +24,4 @@ with base as (
     select *
     from {{ ref('visited_page') }}
 )
-{{ dbt_aql.build_activity('base')}}
+{{ dbt_aql.build_activity('base', null_columns=['anonymous_customer_id','revenue_impact', 'link'])}}
