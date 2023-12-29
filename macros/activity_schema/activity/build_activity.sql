@@ -86,11 +86,19 @@ select
     {% endif %}
     , {{ dbt_aql.build_json(data_types) }} as {{columns.feature_json}}
     , row_number() over (
+        {% if columns.anonymous_customer_id is not defined or 'anonymous_customer_id' in null_columns %}
         partition by {{columns.customer}}
+        {% else %}
+        partition by coalesce({{columns.customer}}, {{columns.anonymous_customer_id}})
+        {% endif %}
         order by {{columns.ts}}, {{surrogate_key_statement}}
     ) as activity_occurrence
     , lead(cast({{columns.ts}} as {{dbt.type_timestamp()}})) over (
+        {% if columns.anonymous_customer_id is not defined or 'anonymous_customer_id' in null_columns %}
         partition by {{columns.customer}}
+        {% else %}
+        partition by coalesce({{columns.customer}}, {{columns.anonymous_customer_id}})
+        {% endif %}
         order by {{columns.ts}}, {{surrogate_key_statement}}
     ) as activity_repeated_at
 from {{cte}}

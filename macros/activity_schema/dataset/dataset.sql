@@ -91,11 +91,19 @@ with
         {%- endif %}
         {%- endfor %}
         row_number() over (
+            {% if columns.anonymous_customer_id is not defined %}
             partition by {{primary}}.{{columns.customer}}
+            {% else %}
+            partition by coalesce({{primary}}.{{columns.customer}}, {{primary}}.{{columns.anonymous_customer_id}})
+            {% endif %}
             order by {{primary}}.{{columns.ts}}, {{primary}}.{{columns.activity_id}}
         ) as {{columns.activity_occurrence}},
         lead({{columns.ts}}) over (
+            {% if columns.anonymous_customer_id is not defined %}
             partition by {{primary}}.{{columns.customer}}
+            {% else %}
+            partition by coalesce({{primary}}.{{columns.customer}}, {{primary}}.{{columns.anonymous_customer_id}})
+            {% endif %}
             order by {{primary}}.{{columns.ts}}, {{primary}}.{{columns.activity_id}}
         ) as {{columns.activity_repeated_at}}
     {% if not skip_stream %}
@@ -121,6 +129,9 @@ with
         {{primary}}.{{columns.ts}} as {{req}}{{columns.ts}},
         {{primary}}.{{columns.activity_occurrence}} as {{req}}{{columns.activity_occurrence}},
         {{primary}}.{{columns.activity_repeated_at}} as {{req}}{{columns.activity_repeated_at}},
+        {% if columns.anonymous_customer_id is defined %}
+        {{primary}}.{{columns.anonymous_customer_id}} as {{req}}{{columns.anonymous_customer_id}},
+        {% endif %}
         {%- for column in primary_activity.columns %}
         {{ dbt_aql.select_column(stream, primary, column).column_sql }} as {{column.alias}}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}
@@ -143,11 +154,19 @@ with
         {%- endif %}
         {%- endfor %}
         row_number() over (
+            {% if columns.anonymous_customer_id is not defined %}
             partition by {{joined}}.{{columns.customer}}
+            {% else %}
+            partition by coalesce({{joined}}.{{columns.customer}}, {{joined}}.{{columns.anonymous_customer_id}})
+            {% endif %}
             order by {{joined}}.{{columns.ts}}, {{joined}}.{{columns.activity_id}}
         ) as {{columns.activity_occurrence}},
         lead({{columns.ts}}) over (
+            {% if columns.anonymous_customer_id is not defined %}
             partition by {{joined}}.{{columns.customer}}
+            {% else %}
+            partition by coalesce({{joined}}.{{columns.customer}}, {{joined}}.{{columns.anonymous_customer_id}})
+            {% endif %}
             order by {{joined}}.{{columns.ts}}, {{joined}}.{{columns.activity_id}}
         ) as {{columns.activity_repeated_at}}
     {% if not skip_stream %}
@@ -183,7 +202,11 @@ with
         {%- if ja.relationship_clause is not none %}
         and {{ ja.relationship_clause }}
         {%- endif %}
+        {% if columns.anonymous_customer_id is defined %}
+        and coalesce({{primary}}.{{req}}{{columns.customer}}, {{primary}}.{{req}}{{columns.anonymous_customer_id}}) = coalesce({{joined}}.{{columns.customer}}, {{joined}}.{{columns.anonymous_customer_id}})
+        {% else %}
         and {{primary}}.{{req}}{{columns.customer}} = {{joined}}.{{columns.customer}}
+        {% endif %}
         and {{ ja.join_clause }}
         {%- if ja.extra_joins is not none %}
         {%- for ej in ja.extra_joins %}
