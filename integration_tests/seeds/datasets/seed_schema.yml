@@ -14,6 +14,13 @@ seeds:
         last_before_total_items_purchased: integer
         last_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
         
+  - name: output__select_all_aggregate_all
+    config:
+      column_types:
+        anonymous_customer_id: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
+        last_before_total_items_purchased: integer
+        last_before_bought_something_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+        
   - name: output__select_all_append_nth_before
     config:
       column_types:
