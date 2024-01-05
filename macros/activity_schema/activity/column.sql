@@ -23,7 +23,7 @@ Be sure to check aql in dataset column models.
     {%- set data_types = activity_node_config.get("data_types", {}) -%}
     {%- set customer_column = dbt_aql.customer_column(stream) -%}
     {%- do data_types.update({customer_column: type_string()}) -%}
-    {%- do data_types.update(dbt_aql.schema_column_types()) -%}
+    {%- do data_types.update(dbt_aql.schema_column_types(stream)) -%}
     {%- if column_name not in data_types.keys() -%}
         {%- set error_message -%}
 aql query in model '{{ model.unique_id }}' has invalid syntax. Column '{{column_name}}' is not registered with a data type

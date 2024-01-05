@@ -3,12 +3,12 @@ build_activity: Compiles a final select statement in a standardized format so th
     - cte: string; the name of the last CTE in the query containing all relevant columns to compile the activity model
 #}
 
-{% macro build_activity(cte, unique_id_column=none, null_columns=['anonymous_customer_id', 'revenue_impact', 'link']) %}
+{% macro build_activity(cte, unique_id_column=none, null_columns=[]) %}
 {{ return(adapter.dispatch('build_activity', 'dbt_aql')(cte, unique_id_column, null_columns)) }}
 {% endmacro %}
 
 
-{% macro default__build_activity(cte, unique_id_column=none, null_columns=['anonymous_customer_id', 'revenue_impact', 'link']) %}
+{% macro default__build_activity(cte, unique_id_column=none, null_columns=[]) %}
 
 {%- for nc in null_columns -%}
     {%- set accepted_values = ["anonymous_customer_id", "revenue_impact", "link"] -%}
@@ -31,17 +31,12 @@ Accepted values are one of {{accepted_values_str}}, but received '{{nc}}'
 {% endif %}
 
 
-{%- set columns = dbt_aql.schema_columns() -%}
 {%- if execute -%}
-{%- do columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
+    {%- set columns = dbt_aql.schema_columns(stream=stream) -%}
+{%- else -%}
+    {%- set columns = dbt_aql.schema_columns() -%}
 {%- endif -%}
-{%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
-    {%- do columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(stream)}) -%}
-{%- endif -%}
-{%- set anonymous = dbt_aql.anonymous_customer_column(stream) -%}
-{%- if anonymous is not none -%}
-    {%- do columns.update({"anonymous_customer_id": anonymous}) -%}
-{%- endif -%}
+
 {%- set model_name_raw = model.name -%}
 {% set model_name = dbt_aql.clean_activity_name(stream, model.name) %}
 
@@ -56,7 +51,11 @@ Accepted values are one of {{accepted_values_str}}, but received '{{nc}}'
 cast({{ dbt_aql.generate_activity_id(surrogate_key_fields) }} as {{dbt.type_string()}})
 {%- endset -%}
 
-{%- set schema_column_types = dbt_aql.schema_column_types() -%}
+{%- if execute -%}
+    {%- set schema_column_types = dbt_aql.schema_column_types(stream) -%}
+{%- else -%}
+    {%- set schema_column_types = dbt_aql.schema_column_types() -%}
+{%- endif -%}
 
 
 select
@@ -87,11 +86,19 @@ select
     {% endif %}
     , {{ dbt_aql.build_json(data_types) }} as {{columns.feature_json}}
     , row_number() over (
+        {% if columns.anonymous_customer_id is not defined or 'anonymous_customer_id' in null_columns %}
         partition by {{columns.customer}}
+        {% else %}
+        partition by coalesce({{columns.customer}}, {{columns.anonymous_customer_id}})
+        {% endif %}
         order by {{columns.ts}}, {{surrogate_key_statement}}
     ) as activity_occurrence
     , lead(cast({{columns.ts}} as {{dbt.type_timestamp()}})) over (
+        {% if columns.anonymous_customer_id is not defined or 'anonymous_customer_id' in null_columns %}
         partition by {{columns.customer}}
+        {% else %}
+        partition by coalesce({{columns.customer}}, {{columns.anonymous_customer_id}})
+        {% endif %}
         order by {{columns.ts}}, {{surrogate_key_statement}}
     ) as activity_repeated_at
 from {{cte}}

@@ -1,4 +1,8 @@
-{% macro _listagg_delimiter() %}
+{% macro listagg_delimiter() %}
+    {{ return(adapter.dispatch("listagg_delimiter", "dbt_aql")())}}
+{% endmacro %}
+
+{% macro default__listagg_delimiter() %}
 {%- do return(dbt.string_literal("\n")) -%}
 {% endmacro %}
 
@@ -28,5 +32,5 @@
 {% endmacro %}
 
 {% macro bigquery__type_json() %}
-{%- do return("struct") -%}
+{%- do return("json") -%}
 {% endmacro %}

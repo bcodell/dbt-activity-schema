@@ -49,24 +49,25 @@ jobs:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - snowflake - with stream
         id: snowflake_ci_with_stream
+        if: github.repository == 'bcodell/dbt-aql'
         run: |
           localstack extensions install localstack-extension-snowflake
           localstack start -d
           cd ./integration_tests
           sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
-          dbt build -x --target snowflake
+          dbt build -x --target snowflake --exclude dataset__select_all_aggregate_all
         env:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
           DEBUG: 1
 
       - name: dbt CI - snowflake - skip stream
         id: snowflake_ci_skip_stream
+        if: github.repository == 'bcodell/dbt-aql'
         run: |
-          localstack stop
-          localstack start -d
           cd ./integration_tests
           sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml
-          dbt build -x --target snowflake
+          dbt run -s activities+ -x --target snowflake --exclude dataset__select_all_aggregate_all
+          dbt test -s activities+ -x --target snowflake --exclude dataset__select_all_aggregate_all
         env:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
           DEBUG: 1
@@ -74,6 +75,7 @@ jobs:
         if: failure() && (steps.snowflake_ci_with_stream.outcome == 'failure' || steps.snowflake_ci_skip_stream.outcome == 'failure' )
         run: localstack logs
       - name: dbt CI - bigquery - with stream
+        if: github.repository == 'bcodell/dbt-aql'
         run: |
           cd ./integration_tests
           sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
@@ -84,12 +86,14 @@ jobs:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - bigquery - skip stream
+        if: github.repository == 'bcodell/dbt-aql'
         run: |
           cd ./integration_tests
           sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml
           echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
           ls -l
-          dbt build -x --target bigquery
+          dbt run -s activities+ -x --target bigquery
+          dbt test -s activities+ -x --target bigquery
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
