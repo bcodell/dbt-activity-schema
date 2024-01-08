@@ -33,7 +33,10 @@ vars:
         customer_id_alias: entity_uuid
         anonymous_customer_id_alias: anonymous_entity_uuid
         model_prefix: customer__
-
+      product_stream:
+        skip_stream: true
+        customer_id_alias: product_sku
+        model_prefix: product__
 
 seeds:
   dbt_aql_integration_tests:
