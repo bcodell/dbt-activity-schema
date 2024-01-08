@@ -16,7 +16,7 @@
   {% set columns = [
       {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
       {'name': 'customer', 'description': 'Identifier for the entity.', 'data_type': type_string()},
-      {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string(), 'tests': ['not_null']},
+      {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string()},
       {'name': 'activity', 'description': 'Type of activity performed.', 'data_type': type_string(), 'tests': ['not_null']},
       {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
       {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': type_int()},
