@@ -34,6 +34,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Parsed invalid re
     {%- set model_name = model_prefix~activity_name -%}
 {%- else -%}
     {%- set model_name = activity_name -%}
+    {%- set activity_name = model_name|replace(model_prefix, '') -%}
 {%- endif -%}
 
 

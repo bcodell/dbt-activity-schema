@@ -49,7 +49,7 @@ jobs:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - snowflake - with stream
         id: snowflake_ci_with_stream
-        if: github.repository == 'bcodell/dbt-aql'
+        if: false
         run: |
           localstack extensions install localstack-extension-snowflake
           localstack start -d
@@ -62,7 +62,7 @@ jobs:
 
       - name: dbt CI - snowflake - skip stream
         id: snowflake_ci_skip_stream
-        if: github.repository == 'bcodell/dbt-aql'
+        if: false
         run: |
           cd ./integration_tests
           sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml

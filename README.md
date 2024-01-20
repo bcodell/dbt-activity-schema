@@ -21,6 +21,8 @@ Given all of these shortcomings, It wouldn't be surprising if developers could w
 
 This project offers a middle ground. With aql, developers can derive their datasets from Activity Streams in a way that is less tedious than writing traditional SQL, easier to learn and read than a convoluted macro, and above all, it _feels_ like writing SQL (with a few new keywords).
 
+That said, proposing (yet) a(nother) new DSL is treacherous territory; there's plenty of literature in staunch opposition of anything other than SQL ([see one oldie-but-goodie example here](https://erikbern.com/2018/08/30/i-dont-want-to-learn-your-garbage-query-language.html)). And that's fair - SQL is well-known and malleable. But as we've highlighted, writing SQL against an activity stream in this modeling paradigm is tedious, redundant, and parameterizable. So this package offers a macro-based interface for generating queries in line with the Activity Schema spec. And for the purists reading this, writing bespoke SQL is also option! That's what dbt was made for anyway 😅
+
 # **Inspiration**
 Numerous projects influenced the design of this one. Such projects include:
 - [Activity Schema Spec](https://github.com/ActivitySchema/ActivitySchema)
@@ -321,21 +323,78 @@ The `build_stream` macro is a convenience function that takes as input a list of
 **Note: When `skip_stream` is configured as `true` for the stream, this macro produces an empty table.**
 </br></br>
 
-# **Creating Datasets: Querying The Activity Stream with `aql`**
+# Creating Datasets
 The Activity Stream is the entrypoint for creating any denormalized dataset needed for analysis or reporting. However, as discussed above, writing bespoke SQL to query it in the standard pattern is tedious and error-prone, and using a macro to auto-generate the SQL is brittle and a subpar development experience.
 
-To solve these shortcomings, this project introduces `aql` (Activity Query Language) - an interface that's easier to learn and more SQL-esque than a macro but substantially more concise than bespoke SQL.
+To solve these shortcomings, this project introduces two solutions - a dbt macro, and an experimental DSL called `aql` (Activity Query Language) - an interface that's easier to learn and more SQL-esque than a macro but substantially more concise than bespoke SQL.
 
-Under the hood, this package will parse the `aql` query string into a json object, then use the object parameters to render the appropriate SQL statement.
-</br></br>
-
-## **The Anatomy of an `aql` Query**
 As a refresher, Activity Stream queries require the following inputs to be defined:
 * The Activity Stream table to use
 * A Primary Activity with columns to include. The Primary Activity defines the granularity of the dataset.
 * 0 or more Joined Activities, with Temporal Join criteria defined and columns to include, with specific aggregation functions to use (if applicable) for each column.
 
-All of these inputs are still needed, and they can be viewed in the following example `aql` query:
+All of these inputs are still needed, and they can be viewed in the following examples - via the `query_stream` macro and via an `aql` query:
+
+# **Creating Datasets Option 1: The `query_stream` Macro**
+For a macro-based approach to producing datasets, use the following syntax:
+```sql
+{{ dbt_aql.query_stream(
+    stream='stream_1',
+    primary_activity=dbt_aql.primary_activity(
+        activity='activity_1',
+        columns=[
+            dbt_aql.dc(
+                column_name='ts',
+                alias='activity_1_at',
+            ),
+            dbt_aql.dc(
+                column_name='feature_2'
+            ),
+            dbt_aql.dc(
+                column_name='feature_3',
+            ),
+        ],
+        filters=[] -- optional (empty list is default)
+    ),
+    joined_activities=[
+        dbt_aql.appended_activity(
+            activity='activity_2',
+            relationship_selector='first', -- only needed for appended activities
+            join_condition='ever',
+            columns=[
+                dbt_aql.dc(
+                    column_name='ts',
+                    alias='first_ever_activity_2_at'
+                )
+            ]
+        ),
+        dbt_aql.aggregated_activity(
+            activity='activity_3',
+            join_condition='after',
+            columns=[
+                dbt_aql.dc(
+                    column_name='activity_id',
+                    aggfunc='count',
+                    alias='count_activity_3_after'
+                ),
+                dbt_aql.dc(
+                    column_name='feature_x',
+                    aggfunc='sum',
+                    alias='sum_feature_x_after'
+                )
+            ],
+            filter_columns=[], -- optional (empty list is default)
+            extra_joins=[], -- optional (empty list is default)
+        )
+    ],
+    included_columns=[] -- optional (empty list is default)
+)}}
+```
+It's long, verbose, and not very readable, but this macro will produce a full sql query and return a dataset. Implementation specifics (including arguments requirements) coming soon.
+
+## **Creating Datasets pt. 2: Querying The Activity Stream with `aql`**
+Under the hood, this package will parse the `aql` query string into a json object, then use the object parameters to render the appropriate SQL statement:
+
 ```sql
 using stream_1
 select all activity_1 (
@@ -351,6 +410,7 @@ aggregate after activity_3 (
     sum(feature_x) as sum_feature_x_after
 )
 ```
+The above statement will produce an identical dataset as the prior macro-based example in a much more concise and readable format.
 
 To use in a dbt model, assign the aql query to a variable, and pass it to the `dataset` macro like so:
 ```sql
@@ -373,7 +433,7 @@ aggregate after activity_3 (
 {{ dbt_aql.dataset(aql) }}
 ```
 
-Implementation details are provided below.
+Syntax details are provided below.
 </br></br>
 
 ## **Activity Stream**
@@ -521,6 +581,8 @@ Each `<column>` value must correspond to the alias of one of the standard Activi
 
 Each included column can optionally be aliased to a whitespace-free friendly name `as <alias>`, where `<alias>` is the name of the column that will be applied to the dataset. Each defined alias must be preceded by `as`. Aliasing is optional - if no alias is explicitly defined, an automated alias will be applied to the column. See more in the `alias_column` macro.
 </br></br>
+
+
 
 # **Advanced Usage**
 
