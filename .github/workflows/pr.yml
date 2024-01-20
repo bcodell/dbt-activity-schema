@@ -2,8 +2,8 @@ name: CI - Pull Request
 on: 
   pull_request:
     branches: [ main ]
-  paths-ignore:
-    - '**/README.md'
+  paths:
+    - '!**/*.md'
 
 jobs:
   CI:
