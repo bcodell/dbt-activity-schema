@@ -335,7 +335,7 @@ As a refresher, Activity Stream queries require the following inputs to be defin
 
 All of these inputs are still needed, and they can be viewed in the following examples - via the `query_stream` macro and via an `aql` query:
 
-# **Creating Datasets Option 1: The `query_stream` Macro**
+## **Creating Datasets Option 1: The `query_stream` Macro**
 For a macro-based approach to producing datasets, use the following syntax:
 ```sql
 {{ dbt_aql.query_stream(
@@ -390,7 +390,53 @@ For a macro-based approach to producing datasets, use the following syntax:
     included_columns=[] -- optional (empty list is default)
 )}}
 ```
-It's long, verbose, and not very readable, but this macro will produce a full sql query and return a dataset. Implementation specifics (including arguments requirements) coming soon.
+It's long, verbose, and not very readable, but this macro will produce a full sql query and return a dataset. Relevant macros and associated inputs are as follows:
+
+### Macro: `query_stream`
+#### Description
+Generate a dataset from an Activity Stream via a macro interface.
+#### Args
+* `stream (str)`: the stream being queried. Should be the name of one of the activity streams in the project.
+* `primary_activity (primary_activity)`: the primary activity to use in the dataset. Requires the activity to be defined in the `primary_activity` macro.
+* `joined_activities (list[appended_activity, aggregated_activity], optional)`: a list of 0 of activities to join to the primary activity when building the dataset. Each list item should be an activity defined in either the `appended_activity` or `aggregated_activity` macro.
+* `included_columns (list[str], optional)`: a list of predefined dataset columns to include in the dataset. Each item should correspond to the name of a model using a `dataset_column` materialization.
+
+### Macro: `primary_activity`
+A wrapper for defining the primary activity to use when building a dataset.
+#### Args
+* `activity (str)`: the name of the activity to use. may exclude the model prefix for the stream.
+* `columns (list[dc])`: a list of one or more columns to use, where each item is defined using the `dc` (dataset column) macro.
+* `relationship_selector (string)`: the relationship selector to use. valid options are `['first', 'nth', 'last', 'all']`
+* `nth (int, optional)`: the nth instance of the activity to use. Only valid when `relationship_selector='nth'`.
+* `filters (list[str], optional)`: the set of filters to apply to subset the activity, where each item is a set of valid sql snippets. Check out the advanced usage section for more details.
+
+### Macro: `appended_activity`
+A wrapper for defining activities to append-join to the primary activity use when building a dataset.
+#### Args
+* `activity (str)`: the name of the activity to use. may exclude the model prefix for the stream.
+* `columns (list[dc])`: a list of one or more columns to use, where each item is defined using the `dc` (dataset column) macro.
+* `relationship_selector (string)`: the relationship selector to use. valid options are `['first', 'nth', 'last']`
+* `nth (int, optional)`: the nth instance of the activity to use. Only valid when `relationship_selector='nth'`.
+* `join_condition (str)`: the join condition used when appending the activity to the primary. Valid options are `['before', 'between', 'after', 'ever']`.
+* `filters (list[str], optional)`: the set of filters to apply to subset the activity, where each item is a set of valid sql snippets. Check out the advanced usage section for more details.
+* `extra_joins (list[str], optional)`: the set of additional join criteria to apply to extend the logic for joining the appended activity to the primary. Check out the advanced usage section for more details.
+
+### Macro: `aggregated_activity`
+A wrapper for defining activities to aggregate-join to the primary activity use when building a dataset.
+#### Args
+* `activity (str)`: the name of the activity to use. may exclude the model prefix for the stream.
+* `columns (list[dc])`: a list of one or more columns to use, where each item is defined using the `dc` (dataset column) macro.
+* `join_condition (str)`: the join condition used when appending the activity to the primary. Valid options are `['before', 'between', 'after', 'all']`.
+* `filters (list[str], optional)`: the set of filters to apply to subset the activity, where each item is a set of valid sql snippets. Check out the advanced usage section for more details.
+* `extra_joins (list[str], optional)`: the set of additional join criteria to apply to extend the logic for joining the appended activity to the primary. Check out the advanced usage section for more details.
+
+### Macro: `dc` (dataset column)
+A wrapper for defining columns to choose in the primary, appended, and aggregated activities in the dataset.
+#### Args
+* `column_name (str)`: the name of the column. Should be a valid key in the `feature_json` or a standard Activity Schema column.
+* `alias (str)`: the column alias to apply when producing the final version of the dataset.
+* `aggfunc (str)`: the name of the aggregation function to apply when transforming the column for the dataset. **Only required for columns declared in `aggregated_activity` macros.**
+
 
 ## **Creating Datasets pt. 2: Querying The Activity Stream with `aql`**
 Under the hood, this package will parse the `aql` query string into a json object, then use the object parameters to render the appropriate SQL statement:

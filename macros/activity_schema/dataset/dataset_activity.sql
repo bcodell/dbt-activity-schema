@@ -27,7 +27,7 @@
         the activity to use
     columns: list[dc]
         a list of columns to use, each passed as a dc macro object
-    relationship_selector: string (optional)
+    relationship_selector: string
         the relationship selector to use.
         valid options are ['first', 'nth', 'last', 'all']
     nth: int (optional)

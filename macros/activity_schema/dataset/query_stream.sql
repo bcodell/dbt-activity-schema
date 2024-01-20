@@ -1,7 +1,7 @@
 {% macro query_stream(stream, primary_activity, joined_activities=[], included_columns=[]) %}
 
 {#
-    stream: ref
+    stream: string
         the stream being queried
     primary_activity: primary_activity
         the primary activity in the dataset
