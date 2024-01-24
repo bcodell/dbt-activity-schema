@@ -19,4 +19,4 @@ include (
 
 -- depends_on: {{ ref('output__select_all_aggregate_after') }}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}

@@ -1,10 +1,10 @@
 {% macro aggfunc_first_value(column) %}
-    {{ return(adapter.dispatch("aggfunc_first_value", "dbt_aql")(column))}}
+    {{ return(adapter.dispatch("aggfunc_first_value", "dbt_activity_schema")(column))}}
 {% endmacro %}
 
 {% macro default__aggfunc_first_value(column) %}
-{%- set joined = dbt_aql.joined() -%}
-{%- set ts = dbt_aql.schema_columns().ts -%}
+{%- set joined = dbt_activity_schema.joined() -%}
+{%- set ts = dbt_activity_schema.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
 cast(split_part(
             min(
@@ -18,8 +18,8 @@ cast(split_part(
 {%- endmacro -%}
 
 {% macro duckdb__aggfunc_first_value(column) %}
-{%- set joined = dbt_aql.joined() -%}
-{%- set ts = dbt_aql.schema_columns().ts -%}
+{%- set joined = dbt_activity_schema.joined() -%}
+{%- set ts = dbt_activity_schema.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
 cast(string_split(
             min(
@@ -32,14 +32,14 @@ cast(string_split(
 {%- endmacro -%}
 
 {% macro snowflake__aggfunc_first_value(column) %}
-{%- set joined = dbt_aql.joined() -%}
-{%- set ts = dbt_aql.schema_columns().ts -%}
+{%- set joined = dbt_activity_schema.joined() -%}
+{%- set ts = dbt_activity_schema.schema_columns().ts -%}
 min_by({{column.column_sql}}, {{joined}}.{{ts}})
 {% endmacro %}
 
 {% macro bigquery__aggfunc_first_value(column) %}
-{%- set joined = dbt_aql.joined() -%}
-{%- set ts = dbt_aql.schema_columns().ts -%}
+{%- set joined = dbt_activity_schema.joined() -%}
+{%- set ts = dbt_activity_schema.schema_columns().ts -%}
 {%- set delimiter = ";.,;" -%}
 cast(split(
             min(

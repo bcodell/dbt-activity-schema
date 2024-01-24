@@ -1,18 +1,18 @@
 {% macro _build_dataset(stream, primary_activity, joined_activities=[], included_columns=[]) %}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set rs = dbt_aql._relationship_selectors() -%}
-{%- set jc = dbt_aql._join_conditions() -%}
-{%- set skip_stream = var("dbt_aql").get("streams", {}).get(stream, {}).get("skip_stream", false) | as_bool -%}
-{%- set columns = dbt_aql.schema_columns(stream) -%}
-{%- set primary_activity_alias = dbt_aql.alias_activity(primary_activity, 1) -%}
-{%- set primary = dbt_aql.primary() -%}
-{%- set joined = dbt_aql.joined() -%}
-{%- set req = dbt_aql._required_prefix() -%}
-{%- set fs = dbt_aql._filtered_suffix() -%}
-{%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set rs = dbt_activity_schema._relationship_selectors() -%}
+{%- set jc = dbt_activity_schema._join_conditions() -%}
+{%- set skip_stream = var("dbt_activity_schema").get("streams", {}).get(stream, {}).get("skip_stream", false) | as_bool -%}
+{%- set columns = dbt_activity_schema.schema_columns(stream) -%}
+{%- set primary_activity_alias = dbt_activity_schema.alias_activity(primary_activity, 1) -%}
+{%- set primary = dbt_activity_schema.primary() -%}
+{%- set joined = dbt_activity_schema.joined() -%}
+{%- set req = dbt_activity_schema._required_prefix() -%}
+{%- set fs = dbt_activity_schema._filtered_suffix() -%}
+{%- set model_prefix = dbt_activity_schema.get_model_prefix(stream) -%}
 
 {% for ic in included_columns %}
-    {%- set ic_activity = dbt_aql._build_activity_from_dataset_column(stream, ic.strip()) -%}
+    {%- set ic_activity = dbt_activity_schema._build_activity_from_dataset_column(stream, ic.strip()) -%}
     {%- if ic_activity is not none -%}
         {%- do joined_activities.append(ic_activity) -%}
     {%- endif -%}
@@ -106,7 +106,7 @@ with
     {% endif %}
     where true
         {% if not skip_stream %}
-        and {{primary}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, primary_activity.activity_name)}}
+        and {{primary}}.{{columns.activity}} = {{dbt_activity_schema.clean_activity_name(stream, primary_activity.activity_name)}}
         {% endif %}
         {% for f in primary_activity.filters %}
         {%- set f_formatted = f.format(primary=primary, joined=joined, **columns) %}
@@ -126,12 +126,12 @@ with
         {{primary}}.{{columns.anonymous_customer_id}} as {{req}}{{columns.anonymous_customer_id}},
         {% endif %}
         {%- for column in primary_activity.columns %}
-        {{ dbt_aql.select_column(stream, primary, column).column_sql }} as {{column.alias}}{% if not loop.last -%},{%- endif -%}
+        {{ dbt_activity_schema.select_column(stream, primary, column).column_sql }} as {{column.alias}}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}
     from {% if primary_activity.filters is none %}{% if not skip_stream %}{{ stream_relation }}{% else %}{{ ref(primary_activity.model_name) }}{% endif %}{% else %}{{primary_activity_alias}}{{fs}}{% endif %} as {{primary}}
     where true
         {% if not skip_stream %}
-        and {{primary}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, primary_activity.activity_name)}}
+        and {{primary}}.{{columns.activity}} = {{dbt_activity_schema.clean_activity_name(stream, primary_activity.activity_name)}}
         {% endif %}
         and {{ primary_activity.relationship_clause }}
 ){% if joined_activities|length > 0 %},{% endif %}
@@ -139,7 +139,7 @@ with
 
 {# cte below only applies to filtered append activities since activity occurrence and next activity need to be recomputed for use in the join #}
 {% if ja.filters is not none and ja.verb == av.append %}
-{{dbt_aql.alias_activity(ja, loop.index)}}{{fs}} as (
+{{dbt_activity_schema.alias_activity(ja, loop.index)}}{{fs}} as (
     select
         {%- for column in columns.items() %}
         {%- if column[0] not in ['activity_occurrence', 'activity_repeated_at'] %}
@@ -169,7 +169,7 @@ with
     {% endif %}
     where true
         {% if not skip_stream %}
-        and {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+        and {{joined}}.{{columns.activity}} = {{dbt_activity_schema.clean_activity_name(stream, ja.activity_name)}}
         {% endif %}
         {% for f in ja.filters %}
         {%- set f_formatted = f.format(primary=primary, joined=joined, **columns) %}
@@ -177,20 +177,20 @@ with
         {%- endfor %}
 ),
 {% endif %}
-{{ dbt_aql.alias_activity(ja, loop.index) }} as (
+{{ dbt_activity_schema.alias_activity(ja, loop.index) }} as (
     {% if (ja.verb, ja.join_condition) != (av.aggregate, jc.all) %}
     select
         {{primary}}.{{req}}{{columns.activity_id}},
         {%- for column in ja.columns -%}
-        {%- set parsed_col = dbt_aql.select_column(stream, joined, column) %}
+        {%- set parsed_col = dbt_activity_schema.select_column(stream, joined, column) %}
         {{ column.aggfunc(parsed_col) }} as {{ column.alias }}{% if not loop.last -%},{%- endif -%}
         {%- endfor %}
     from {{primary_activity_alias}} as {{primary}}
-    left join {% if ja.filters is not none and ja.verb == av.append %}{{dbt_aql.alias_activity(ja, loop.index)}}{{fs}}{% else %}{% if not skip_stream %}{{ stream_relation }}{% else %}{{ ref(ja.model_name) }}{% endif %}{% endif %} {{joined}}
+    left join {% if ja.filters is not none and ja.verb == av.append %}{{dbt_activity_schema.alias_activity(ja, loop.index)}}{{fs}}{% else %}{% if not skip_stream %}{{ stream_relation }}{% else %}{{ ref(ja.model_name) }}{% endif %}{% endif %} {{joined}}
         -- filter joined activity first to improve query performance
         on true
         {% if not skip_stream %}
-        and {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+        and {{joined}}.{{columns.activity}} = {{dbt_activity_schema.clean_activity_name(stream, ja.activity_name)}}
         {% endif %}
         {%- if ja.relationship_clause is not none %}
         and {{ ja.relationship_clause }}
@@ -219,7 +219,7 @@ with
     select
         {{joined}}.{{columns.customer}},
         {%- for column in ja.columns %}
-            {%- set parsed_col = dbt_aql.select_column(stream, joined, column) -%}
+            {%- set parsed_col = dbt_activity_schema.select_column(stream, joined, column) -%}
             {{ column.aggfunc(parsed_col) }} as {{ column.alias }}{% if not loop.last %},{% endif %}
         {%- endfor %}
     {% if not skip_stream %}
@@ -227,7 +227,7 @@ with
     {% else %}
     from {{ ref(ja.model_name) }} {{joined}}
     {% endif %}
-    where {{joined}}.{{columns.activity}} = {{dbt_aql.clean_activity_name(stream, ja.activity_name)}}
+    where {{joined}}.{{columns.activity}} = {{dbt_activity_schema.clean_activity_name(stream, ja.activity_name)}}
     {% if ja.filters is not none %}
         {%- for f in ja.filters %}
         {%- set f_formatted = f.format(primary=primary, joined=joined, **columns) %}
@@ -243,11 +243,11 @@ select
     {{primary}}.{{column.alias}}{% if loop.last and joined_activities|length == 0 -%}{% else -%},{%- endif -%}
     {%- endfor %}
     {%- for ja in joined_activities -%}
-    {%- set ja_alias = dbt_aql.alias_activity(ja, loop.index) -%}
+    {%- set ja_alias = dbt_activity_schema.alias_activity(ja, loop.index) -%}
     {%- set ja_loop_last = loop.last %}
     {%- for column in ja.columns %}
     {%- if column.zero_fill %}
-    {{ dbt_aql.zero_fill(ja_alias~'.'~column.alias) }} as {{column.alias}}{% if ja_loop_last and loop.last -%}{%- else %},{%- endif -%}
+    {{ dbt_activity_schema.zero_fill(ja_alias~'.'~column.alias) }} as {{column.alias}}{% if ja_loop_last and loop.last -%}{%- else %},{%- endif -%}
     {%- else %}
     {{ja_alias}}.{{column.alias}} as {{column.alias}}{% if ja_loop_last and loop.last -%}{%- else %},{%- endif -%}
     {%- endif %}
@@ -255,7 +255,7 @@ select
     {%- endfor %}
 from {{ primary_activity_alias }} as {{primary}}
 {%- for ja in joined_activities %}
-{%- set joined_alias = dbt_aql.alias_activity(ja, loop.index) %}
+{%- set joined_alias = dbt_activity_schema.alias_activity(ja, loop.index) %}
 left join {{ joined_alias }}
 {%- if (ja.verb, ja.join_condition) != (av.aggregate, jc.all) %}
     on {{primary}}.{{req}}{{columns.activity_id}} = {{joined_alias}}.{{req}}{{columns.activity_id}}

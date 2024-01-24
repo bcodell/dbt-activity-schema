@@ -1,10 +1,10 @@
 {% macro _build_activity_from_dataset_column(stream, dataset_column) %}
 
 {%- if execute -%}
-    {%- set ws = dbt_aql.whitespace() -%}
-    {%- set av = dbt_aql._activity_verbs() -%}
+    {%- set ws = dbt_activity_schema.whitespace() -%}
+    {%- set av = dbt_activity_schema._activity_verbs() -%}
     {%- set project_name = model['unique_id'].split(".")[1] -%}
-    {%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
+    {%- set model_prefix = dbt_activity_schema.get_model_prefix(stream) -%}
     {%- if modules.re.search(model_prefix, dataset_column) is none -%}
         {%- set dataset_column = model_prefix~dataset_column -%}
     {%- endif -%}
@@ -28,11 +28,11 @@ Full dataset column query:
         {{ exceptions.raise_compiler_error(error_message) }}
     {%- endif -%}
 
-    {%- set query_no_comments = dbt_aql._strip_comments(aql) -%}
-    {%- set query_clean = dbt_aql._clean_query(query_no_comments) -%}
-    {%- set using, rest = dbt_aql._parse_keyword(query_clean, ["using"]) -%}
-    {%- set stream, rest = dbt_aql._parse_stream(rest) -%}
-    {%- set activity, rest = dbt_aql._parse_activity(rest, stream, [av.aggregate, av.append]) -%}
+    {%- set query_no_comments = dbt_activity_schema._strip_comments(aql) -%}
+    {%- set query_clean = dbt_activity_schema._clean_query(query_no_comments) -%}
+    {%- set using, rest = dbt_activity_schema._parse_keyword(query_clean, ["using"]) -%}
+    {%- set stream, rest = dbt_activity_schema._parse_stream(rest) -%}
+    {%- set activity, rest = dbt_activity_schema._parse_activity(rest, stream, [av.aggregate, av.append]) -%}
 
     {%- if activity.columns|length != 1 -%}
         {%- set error_message -%}

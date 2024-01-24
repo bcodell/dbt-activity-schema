@@ -39,9 +39,9 @@
 {% endmacro %}
 
 {% macro _valid_query_syntax() %}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set rs = dbt_aql._relationship_selectors() -%}
-{%- set jc = dbt_aql._join_conditions() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set rs = dbt_activity_schema._relationship_selectors() -%}
+{%- set jc = dbt_activity_schema._join_conditions() -%}
 
 {%- set relationship_selectors = namespace(
     name="relationship_selectors",

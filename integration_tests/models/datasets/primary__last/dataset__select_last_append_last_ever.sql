@@ -16,4 +16,4 @@ append last ever bought_something(
 
 -- depends_on: {{ ref('output__select_last_append_last_ever') }}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}

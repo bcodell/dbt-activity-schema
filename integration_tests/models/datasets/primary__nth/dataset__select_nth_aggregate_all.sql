@@ -17,4 +17,4 @@ aggregate all bought_something(
 
 -- depends_on: {{ ref('output__select_nth_aggregate_all') }}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}

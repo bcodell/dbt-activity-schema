@@ -1,5 +1,5 @@
 {% macro aggfunc_max(column) %}
-    {{ return(adapter.dispatch("aggfunc_max", "dbt_aql")(column))}}
+    {{ return(adapter.dispatch("aggfunc_max", "dbt_activity_schema")(column))}}
 {% endmacro %}
 
 {% macro default__aggfunc_max(column) %}

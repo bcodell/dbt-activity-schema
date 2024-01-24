@@ -8,7 +8,7 @@
 
 {%- set project_name = model['unique_id'].split(".")[1] -%}
 {%- if execute -%}
-    {%- set model_prefix = var("dbt_aql").get("streams").get(stream, {}).get("model_prefix", "") -%}
+    {%- set model_prefix = var("dbt_activity_schema").get("streams").get(stream, {}).get("model_prefix", "") -%}
     {%- set activity_node = graph.get("nodes", {}).get("model."~project_name~"."~model_prefix~activity_name, none) -%}
 
     {%- if activity_node is none -%}
@@ -21,9 +21,9 @@ Be sure to check aql in dataset column models.
 
     {%- set activity_node_config = activity_node.get("config", {}) -%}
     {%- set data_types = activity_node_config.get("data_types", {}) -%}
-    {%- set customer_column = dbt_aql.customer_column(stream) -%}
+    {%- set customer_column = dbt_activity_schema.customer_column(stream) -%}
     {%- do data_types.update({customer_column: type_string()}) -%}
-    {%- do data_types.update(dbt_aql.schema_column_types(stream)) -%}
+    {%- do data_types.update(dbt_activity_schema.schema_column_types(stream)) -%}
     {%- if column_name not in data_types.keys() -%}
         {%- set error_message -%}
 aql query in model '{{ model.unique_id }}' has invalid syntax. Column '{{column_name}}' is not registered with a data type
@@ -37,7 +37,7 @@ Be sure to check aql in dataset column models.
 {%- set data_type = dbt.type_string() -%}
 {%- endif -%}
 
-{%- set am = dbt_aql._aggregation_map() -%}
+{%- set am = dbt_activity_schema._aggregation_map() -%}
 {%- if aggfunc is not none -%}
     {%- set zero_fill = aggfunc in am.zero_fill_aggregations -%}
 {%- else -%}

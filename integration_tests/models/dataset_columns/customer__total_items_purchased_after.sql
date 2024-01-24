@@ -7,4 +7,4 @@ aggregate after bought_something (
 
 {{config(materialized='dataset_column', aql=aql)}}
 
-{{ dbt_aql.dataset_column(aql) }}
+{{ dbt_activity_schema.dataset_column(aql) }}
