@@ -1,5 +1,5 @@
 # **dbt-activity-schema**
-A dbt package to query Activity Streams using a SQL-esque interface called `aql` - Activity Query Language. In addition to a proposed implementation of aql, it contains myriad utility functions to empower users to build entire Activity Schema data pipelines in their dbt projects.
+A dbt package to build and maintain Activity Schema data pipelines and build datasets from Activity Streams. Assumes some working knowledge of the [Activity Schema Spec](https://github.com/ActivitySchema/ActivitySchema).
 
 # Sponsors
 
@@ -9,11 +9,17 @@ Big thanks to [LocalStack](https://localstack.cloud) for providing PRO licenses 
 
 
 # **Motivation**
-After contributing to multiple dbt projects that support Activity Schema modeling in dbt, it became apparent that a macro-based UX for generating ad hoc datasets from Activity Stream tables for analysis development left a lot to be desired. This project exists for two reasons - to make it easier to operate an Activity Schema, and to offer a preliminary proposal for a standard method for deriving datasets from stream-like tables.
+After contributing to multiple dbt projects that support Activity Schema modeling in dbt, two observations became apparent:
+1. dbt is a reasonable environment for building and maintaining data pipelines that adhere to the Activity Schema spec.
+2. A macro-based UX for generating ad hoc datasets from Activity Stream tables for analysis development left a lot to be desired.
 
-For one, macro interfaces are fickle, as developers need to memorize the input arguments for the macro and how each should be provided. is the input a string? A dbt `ref`? Another macro? Rendered or unrendered? This challenge compounds on the existing need for developers to learn the semantics of Activity Schema modeling even before leveraging a tool to build it.
+This project exists for two reasons - to make it easier to operate an Activity Schema, and to offer a preliminary proposal for a standard method for deriving datasets from stream-like tables.
 
-Second, all versions of a macro to produce a dataset from an Activity Stream are particularly verbose - declaring a stream, a primary activity, one or more joined activities, their relationships to the primary activity, columns to include, aliases and aggregations to apply to each column - in addition to the tediousness of defining all of these attributes in a macro, the code gets less and less readable as the dataset is expanded.
+The benefits for operating an Activity Schema are obvious - the data development workflow for this methodology is highly repetitive, and dbt's macro interface is good enough to abstract away *most of* that redundancy without too much pain.
+
+However, when macros require dozens of input arguments, they become painful to use, and this case applies particularly to building datasets from Activity Streams. For one, developers need to memorize the input arguments for the macro and their corresponding formats. Is the input a string? A dbt `ref`? Another macro? Rendered or unrendered? This challenge compounds on the existing need for developers to learn the semantics of Activity Schema modeling even before leveraging a tool to build it.
+
+Second, all versions of a macro to produce a dataset from an Activity Stream are particularly verbose - declaring a stream, a primary activity, one or more joined activities, their relationships to the primary activity, columns to include, aliases and aggregations to apply to each column - in addition to the tediousness of defining all of these attributes in a macro, the code gets less and less readable as the dataset is expanded (i.e. more columns are added).
 
 But ultimately, there's an emotional component as well. Data professionals _enjoy_ writing SQL. They're familiar with it. They're good at it. It's easy to achieve a flow state while writing it. But the UX of a dbt macro is decidedly un-SQL-like. Developers embrace macros when it allows them to make their SQL more DRY - but to provide a solution that entirely strips away any SQL writing from their work, particularly given the aforementioned challenges, feels like one that is missing the mark.
 
@@ -31,12 +37,12 @@ Numerous projects influenced the design of this one. Such projects include:
 - My own prior implementation of an [activity schema dbt package](https://github.com/bcodell/dbt-activity-schema)
 
 
-# **Implementation**
-At a high level, all this project does is parse a string, generate a set of parameters from that string, then render a SQL query from those parameters. But at its core, this project is effectively a proposal for a vocabulary to use when querying stream-like tables. In order to obtain meaningful feedback and iterate on such a proposal, it needs to meet its prospective users where they already live. In the analytics world, that place is dbt.
+# **Implementation Design Decisions**
+At its core, this project is effectively a proposal for for an alternative data modeling standard with tooling tailored to the methodology. In order to obtain meaningful feedback and iterate on such a proposal, it needs to meet its prospective users where they already live. In the analytics world, that place is dbt.
 
-Given that need, there were a couple paths forward for building this project. One is to build a standalone package, with integrations for use in other dialects, languages, and frameworks. Prql is a great example of a similar project. But while [admirable implementations exist](https://github.com/PRQL/dbt-prql) to integrate such projects with dbt, a standard integration pattern has yet to be agreed upon, and taking such a path would require more upfront work to support multiple SQL dialects. The other approach - a dbt package - has a known standard for integrating with dbt, a prototype could be built rather quickly, and it could leverage the multi-dialect support that comes for free in dbt. For those reasons, that was the solution picked for this iteration of the project.
+For the scaffolding to support activity definitions, building streams, incremental updates, identity resolution, and all of the other needs of building an Activity Schema data pipeline, a dbt package is the logical choice. Developers mostly write sql, and call the corresponding macros to make their code DRYer (more DRY? 🤷‍♂️). What's less certain is the implementation strategy for the experimental `aql`.
 
-Finally, given the nascent (but burgeoning) state of adoption of Activity Schema as a viable data modeling standard, an aql query parser alone isn't enough. People need to adopt the modeling paradigm before they spend time thinking about the ideal semantics for using it. For that reason, this project also contains all the relevant utility functions needed to build entire Activity Schema data pipelines with dbt.
+On that subject, there were a couple paths forward for building this project. One is to build a standalone package, with integrations for use in other dialects, languages, and frameworks. Prql is a great example of a similar project. But while [admirable implementations exist](https://github.com/PRQL/dbt-prql) to integrate such projects with dbt, a standard integration pattern has yet to be agreed upon, and taking such a path would require more upfront work to support multiple SQL dialects. The other approach - a dbt package - has a known standard for integrating with dbt, a prototype could be built rather quickly, and it could leverage the multi-dialect support that comes for free in dbt. For those reasons, embedding the `aql` parser into a dbt package was the preferred choice for this iteration of the project.
 </br></br>
 
 
