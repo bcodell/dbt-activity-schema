@@ -45,6 +45,15 @@ For the scaffolding to support activity definitions, building streams, increment
 On that subject, there were a couple paths forward for building this project. One is to build a standalone package, with integrations for use in other dialects, languages, and frameworks. Prql is a great example of a similar project. But while [admirable implementations exist](https://github.com/PRQL/dbt-prql) to integrate such projects with dbt, a standard integration pattern has yet to be agreed upon, and taking such a path would require more upfront work to support multiple SQL dialects. The other approach - a dbt package - has a known standard for integrating with dbt, a prototype could be built rather quickly, and it could leverage the multi-dialect support that comes for free in dbt. For those reasons, embedding the `aql` parser into a dbt package was the preferred choice for this iteration of the project.
 </br></br>
 
+# **Warehouse Compatibility**
+This project has been tested and is compatible with the following data warehouses:
+* Snowflake
+* Bigquery
+* Postgres
+* Duckdb (Motherduck not yet tested)
+
+Other warehouses (e.g. Redshift) may work but have not yet been tested.
+
 
 # **Project Configuration**
 In order to use the package, a variable called `dbt_activity_schema` needs to be added to the project's `dbt_project.yml`. It should take the following format:
