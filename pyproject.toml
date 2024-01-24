@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dbt-aql"
+name = "dbt-activity-schema"
 version = "0.2.0"
 description = "A dbt package to query Activity Streams using a SQL-esque interface."
 authors = ["Bryce Codell <bryce.codell@24analytics.co"]

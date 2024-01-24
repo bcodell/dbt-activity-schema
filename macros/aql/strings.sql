@@ -9,5 +9,5 @@
 {% endmacro %}
 
 {% macro select_whitespace() %}
-{%- do return('[{whitespace}]select[{whitespace}]'.format(whitespace=dbt_aql.whitespace())) -%}
+{%- do return('[{whitespace}]select[{whitespace}]'.format(whitespace=dbt_activity_schema.whitespace())) -%}
 {% endmacro %}

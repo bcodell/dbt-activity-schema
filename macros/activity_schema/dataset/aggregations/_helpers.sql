@@ -1,5 +1,5 @@
 {% macro listagg_delimiter() %}
-    {{ return(adapter.dispatch("listagg_delimiter", "dbt_aql")())}}
+    {{ return(adapter.dispatch("listagg_delimiter", "dbt_activity_schema")())}}
 {% endmacro %}
 
 {% macro default__listagg_delimiter() %}
@@ -7,7 +7,7 @@
 {% endmacro %}
 
 {% macro type_boolean() %}
-    {{ return(adapter.dispatch("type_boolean", "dbt_aql")())}}
+    {{ return(adapter.dispatch("type_boolean", "dbt_activity_schema")())}}
 {% endmacro %}
 
 {% macro default__type_boolean() %}
@@ -20,7 +20,7 @@
 
 
 {% macro type_json() %}
-    {{ return(adapter.dispatch("type_json", "dbt_aql")())}}
+    {{ return(adapter.dispatch("type_json", "dbt_activity_schema")())}}
 {% endmacro %}
 
 {% macro default__type_json() %}

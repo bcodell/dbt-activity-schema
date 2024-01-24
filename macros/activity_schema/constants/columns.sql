@@ -1,5 +1,5 @@
 {% macro customer_column(stream) %}
-{%- set customer_alias = var("dbt_aql").get("streams", {}).get(stream, {}).get("customer_id_alias", none) -%}
+{%- set customer_alias = var("dbt_activity_schema").get("streams", {}).get(stream, {}).get("customer_id_alias", none) -%}
 {%- if customer_alias is none -%}
     {%- set error_message -%}
 Configuration for stream '{{stream}}' does not include required alias for customer ID column.
@@ -13,7 +13,7 @@ Please add `customer_id_alias` in your dbt_project.yml configuration for stream 
 
 
 {% macro anonymous_customer_column(stream) %}
-{%- do return(var("dbt_aql").get("streams").get(stream, {}).get("anonymous_customer_id_alias", none)) -%}
+{%- do return(var("dbt_activity_schema").get("streams").get(stream, {}).get("anonymous_customer_id_alias", none)) -%}
 {% endmacro %}
 
 
@@ -34,7 +34,7 @@ Please add `customer_id_alias` in your dbt_project.yml configuration for stream 
     link = "link"
 ) -%}
 
-{%- set column_config = var("dbt_aql").get("column_configuration", {}) -%}
+{%- set column_config = var("dbt_activity_schema").get("column_configuration", {}) -%}
 {%- set included_optional_columns = column_config.get("included_optional_columns", []) -%}
 {#
 check for adherence to activity schema spec naming conventions
@@ -67,9 +67,9 @@ to alias are '{{required_columns.keys()}}'
 {%- do required_columns.update(stream_aliases) -%}
 
 {%- if stream is not none -%}
-    {%- do required_columns.update({"customer": dbt_aql.customer_column(stream)}) -%}
-    {%- if dbt_aql.anonymous_customer_column(stream) is not none -%}
-        {%- do required_columns.update({"anonymous_customer_id": dbt_aql.anonymous_customer_column(stream)}) -%}
+    {%- do required_columns.update({"customer": dbt_activity_schema.customer_column(stream)}) -%}
+    {%- if dbt_activity_schema.anonymous_customer_column(stream) is not none -%}
+        {%- do required_columns.update({"anonymous_customer_id": dbt_activity_schema.anonymous_customer_column(stream)}) -%}
     {%- endif -%}
 {%- endif -%}
 {%- do return(required_columns) -%}
@@ -79,12 +79,12 @@ to alias are '{{required_columns.keys()}}'
 
 {% macro schema_column_types(stream=none) %}
 {# returns a dict where each key is the alias of the activity schema column and each value is the corresponding data type #}
-{%- set columns = dbt_aql.schema_columns(stream) -%}
+{%- set columns = dbt_activity_schema.schema_columns(stream) -%}
 {%- set column_types = {
     columns.activity_id: dbt.type_string(),
     columns.ts: dbt.type_timestamp(),
     columns.activity: dbt.type_string(),
-    columns.feature_json: dbt_aql.type_json(),
+    columns.feature_json: dbt_activity_schema.type_json(),
     columns.activity_occurrence: dbt.type_int(),
     columns.activity_repeated_at: dbt.type_timestamp()
 } -%}
@@ -95,7 +95,7 @@ to alias are '{{required_columns.keys()}}'
     {%- do column_types.update({columns.link: dbt.type_string()}) -%}
 {%- endif -%}
 {%- if stream is not none -%}
-    {%- set customer_col = dbt_aql.customer_column(stream) -%}
+    {%- set customer_col = dbt_activity_schema.customer_column(stream) -%}
     {%- do column_types.update({customer_col: dbt.type_string()}) -%}
     {%- if columns.anonymous_customer_id is defined -%}
         {%- do column_types.update({columns.anonymous_customer_id: dbt.type_string()}) -%}

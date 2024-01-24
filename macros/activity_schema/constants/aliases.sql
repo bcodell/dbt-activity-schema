@@ -1,5 +1,5 @@
 {% macro alias_activity(activity, ix) %}
-{%- set av = dbt_aql._activity_verbs() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
 {%- if activity.verb == av.select -%}
     {%- set prefix = "primary" -%}
     {%- set attributes = [prefix, activity.relationship_selector, activity.activity_name, activity.nth, ix] -%}
@@ -39,12 +39,12 @@
 {% endmacro %}
 
 {% macro clean_activity_name(stream, activity_name) %}
-{{ return(adapter.dispatch('clean_activity_name', 'dbt_aql')(stream, activity_name)) }}
+{{ return(adapter.dispatch('clean_activity_name', 'dbt_activity_schema')(stream, activity_name)) }}
 {% endmacro %}
 
 
 {% macro default__clean_activity_name(stream, activity_name) %}
-{%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
+{%- set model_prefix = dbt_activity_schema.get_model_prefix(stream) -%}
 
 {%- set name_split = modules.re.split(model_prefix, activity_name) -%}
 {%- if name_split|length > 1 -%}
@@ -63,6 +63,6 @@
 {% endmacro %}
 
 {% macro get_model_prefix(stream) %}
-{%- set model_prefix = var("dbt_aql").get("streams").get(stream, {}).get("model_prefix", "__") -%}
+{%- set model_prefix = var("dbt_activity_schema").get("streams").get(stream, {}).get("model_prefix", "__") -%}
 {%- do return(model_prefix) -%}
 {% endmacro %}

@@ -10,18 +10,18 @@
 
 
 {% macro _clean_query(query) %}
-{%- do return(modules.re.split(dbt_aql.whitespace(), query.strip())|join(" ")) -%}
+{%- do return(modules.re.split(dbt_activity_schema.whitespace(), query.strip())|join(" ")) -%}
 {% endmacro %}
 
 
 {% macro parse_aql(query) %}
-{%- set ws = dbt_aql.whitespace() -%}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set query_no_comments = dbt_aql._strip_comments(query) -%}
-{%- set query_clean = dbt_aql._clean_query(query_no_comments) -%}
-{%- set using, rest = dbt_aql._parse_keyword(query_clean, ["using"]) -%}
-{%- set stream, rest = dbt_aql._parse_stream(rest) -%}
-{%- set primary_activity, rest = dbt_aql._parse_activity(rest, stream, [av.select]) -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set query_no_comments = dbt_activity_schema._strip_comments(query) -%}
+{%- set query_clean = dbt_activity_schema._clean_query(query_no_comments) -%}
+{%- set using, rest = dbt_activity_schema._parse_keyword(query_clean, ["using"]) -%}
+{%- set stream, rest = dbt_activity_schema._parse_stream(rest) -%}
+{%- set primary_activity, rest = dbt_activity_schema._parse_activity(rest, stream, [av.select]) -%}
 
 
 {%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
@@ -37,13 +37,13 @@
 {%- set included_dataset_columns = [] -%}
 {%- set rest_dict = {'rest': rest} -%}
 {%- for i in range(num_activities) -%}
-    {%- set verb, unused_rest = dbt_aql._parse_keyword(rest_dict.rest, [av.append, av.aggregate, av.include]) -%}
+    {%- set verb, unused_rest = dbt_activity_schema._parse_keyword(rest_dict.rest, [av.append, av.aggregate, av.include]) -%}
     {%- if verb in [av.append, av.aggregate] -%}
-        {%- set joined_activity, x = dbt_aql._parse_activity(rest_dict.rest, stream, [av.append, av.aggregate]) -%}
+        {%- set joined_activity, x = dbt_activity_schema._parse_activity(rest_dict.rest, stream, [av.append, av.aggregate]) -%}
         {%- do joined_activities.append(joined_activity) -%}
         {%- do rest_dict.update({'rest': x}) -%}
     {%- elif verb == av.include -%}
-        {%- set included_columns, x = dbt_aql._parse_included_columns(rest_dict.rest, stream, [av.include]) -%}
+        {%- set included_columns, x = dbt_activity_schema._parse_included_columns(rest_dict.rest, stream, [av.include]) -%}
         {%- for ic in included_columns -%}
             {%- do included_dataset_columns.append(ic) -%}
         {%- endfor -%}
@@ -60,7 +60,7 @@
 {% endmacro %}
 
 {% macro _parse_keyword(query, keywords=none) %}
-{%- set parsed_word = modules.re.split("\(", modules.re.split(dbt_aql.whitespace(), query.lower().strip())[0].strip())[0].strip() -%}
+{%- set parsed_word = modules.re.split("\(", modules.re.split(dbt_activity_schema.whitespace(), query.lower().strip())[0].strip())[0].strip() -%}
 {%- if keywords is none -%}
     {%- set parsed_word_len = parsed_word|length -%}
     {%- do return((parsed_word, query[parsed_word_len:].strip())) -%}
@@ -81,14 +81,14 @@ Expected {{keyword_str}}, got '{{parsed_word}}'
 
 
 {% macro _parse_stream(query) %}
-{%- set stream = modules.re.split(dbt_aql.whitespace(), query)[0] %}
-{%- set streams = var("dbt_aql", {}).get("streams", {}).keys() -%}
+{%- set stream = modules.re.split(dbt_activity_schema.whitespace(), query)[0] %}
+{%- set streams = var("dbt_activity_schema", {}).get("streams", {}).keys() -%}
 {%- if stream not in streams -%}
     {%- set error_message -%}
 Error: aql query in model '{{ model.unique_id }}' specifies unconfigured stream '{{stream}}'.
 The stream name should be listed as a variable in dbt_project.yml like so:
 vars:
-  dbt_aql:
+  dbt_activity_schema:
     streams:
         {{stream}}:
         customer_id_alias: <alias>
@@ -102,11 +102,11 @@ vars:
 
 
 {% macro _parse_activity(query, stream, expected_verbs) %}
-{%- set ws = dbt_aql.whitespace() -%}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set vqs = dbt_aql._valid_query_syntax() -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set vqs = dbt_activity_schema._valid_query_syntax() -%}
 {%- set rs = vqs.relationship_selectors -%}
-{%- set verb, query = dbt_aql._parse_keyword(query, expected_verbs) -%}
+{%- set verb, query = dbt_activity_schema._parse_keyword(query, expected_verbs) -%}
 {%- set verb_str = "({aggregate}|{append}|{include})".format(aggregate=av.aggregate, append=av.append, include=av.include) -%}
 {%- set keyword_str = ws~verb_str~ws -%}
 {%- if modules.re.search(keyword_str, query, modules.re.IGNORECASE) is not none -%}
@@ -119,35 +119,35 @@ vars:
 
 {%- if verb == av.select -%}
     {%- set join_condition = none -%}
-    {%- set relationship_selector, rest = dbt_aql._parse_keyword(query, rs.select) -%}
+    {%- set relationship_selector, rest = dbt_activity_schema._parse_keyword(query, rs.select) -%}
     {%- if relationship_selector == rs.registry.nth -%}
-        {%- set nth, rest = dbt_aql._parse_nth(rest) -%}
+        {%- set nth, rest = dbt_activity_schema._parse_nth(rest) -%}
     {%- else -%}
         {%- set nth = none -%}
     {%- endif -%}
 
 {%- elif verb == av.append -%}
-    {%- set relationship_selector, rest = dbt_aql._parse_keyword(query, rs.append) -%}
+    {%- set relationship_selector, rest = dbt_activity_schema._parse_keyword(query, rs.append) -%}
     {%- if relationship_selector == rs.registry.nth -%}
-        {%- set nth, rest = dbt_aql._parse_nth(rest) -%}
+        {%- set nth, rest = dbt_activity_schema._parse_nth(rest) -%}
     {%- else -%}
         {%- set nth = none -%}
     {%- endif -%}
     {%- set jc = vqs.join_conditions.append -%}
-    {%- set join_condition, rest = dbt_aql._parse_keyword(rest, jc) -%}
+    {%- set join_condition, rest = dbt_activity_schema._parse_keyword(rest, jc) -%}
 
 
 {%- elif verb == av.aggregate -%}
     {%- set relationship_selector = none -%}
     {%- set nth = none -%}
     {%- set jc = vqs.join_conditions.aggregate -%}
-    {%- set join_condition, rest = dbt_aql._parse_keyword(query, jc) -%}
+    {%- set join_condition, rest = dbt_activity_schema._parse_keyword(query, jc) -%}
 
 {%- endif -%}
 
-{%- set activity_name, rest = dbt_aql._parse_keyword(rest) -%}
+{%- set activity_name, rest = dbt_activity_schema._parse_keyword(rest) -%}
 
-{%- set columns, rest = dbt_aql._parse_columns(
+{%- set columns, rest = dbt_activity_schema._parse_columns(
     query=rest,
     stream=stream,
     activity_name=activity_name,
@@ -158,19 +158,19 @@ vars:
 ) -%}
 
 {%- if rest is not none -%}
-    {%- set filters, rest = dbt_aql._parse_filters(rest) -%}
+    {%- set filters, rest = dbt_activity_schema._parse_filters(rest) -%}
 {%- else -%}
     {%- set filters = none -%}
 {%- endif -%}
 
 
 {%- if rest is not none -%}
-    {%- set extra_joins = dbt_aql._parse_extra_joins(rest) -%}
+    {%- set extra_joins = dbt_activity_schema._parse_extra_joins(rest) -%}
 {%- else -%}
     {%- set extra_joins = none -%}
 {%- endif -%}
 
-{%- do return((dbt_aql.activity(
+{%- do return((dbt_activity_schema.activity(
     activity_name=activity_name,
     stream=stream,
     verb=verb,
@@ -209,7 +209,7 @@ Error: relationship selector 'nth' expects numeric value. Got '{{nth_raw}}'
 
 
 {% macro _parse_columns(query, stream, activity_name, verb, relationship_selector, nth, join_condition) %}
-{%- set ws = dbt_aql.whitespace() -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
 {%- set first_char = query.strip()[0] -%}
 {%- if first_char != "(" -%}
     {%- set error_message -%}
@@ -242,7 +242,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
 
 {%- set columns = [] -%}
 {%- for col in column_str -%}
-    {%- set parsed_col = dbt_aql._parse_column(
+    {%- set parsed_col = dbt_activity_schema._parse_column(
         column_str=col.strip(),
         stream=stream,
         activity_name=activity_name,
@@ -260,11 +260,11 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
 
 
 {% macro _parse_column(column_str, stream, activity_name, verb, relationship_selector, nth, join_condition) %}
-{%- set punc = dbt_aql.punctuation() -%}
-{%- set ws = dbt_aql.whitespace() -%}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set rs = dbt_aql._relationship_selectors() -%}
-{%- set am = dbt_aql._aggregation_map() -%}
+{%- set punc = dbt_activity_schema.punctuation() -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set rs = dbt_activity_schema._relationship_selectors() -%}
+{%- set am = dbt_activity_schema._aggregation_map() -%}
 
 {%- if verb == av.select -%}
     {%- set aggfunc = none -%}
@@ -281,7 +281,7 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Please wrap speci
 
 {%- elif verb == av.aggregate -%}
     {%- if modules.re.search("\(", column_str, modules.re.IGNORECASE) is not none -%}
-        {%- set aggfunc_str, column_str = dbt_aql._parse_keyword(column_str, am.valid_aggregations) -%}
+        {%- set aggfunc_str, column_str = dbt_activity_schema._parse_keyword(column_str, am.valid_aggregations) -%}
         {%- set aggfunc = am[aggfunc_str] -%}
         {%- set column_str = column_str.translate(column_str.maketrans("","", punc)).strip() -%}
     {%- else -%}
@@ -304,10 +304,10 @@ be wrapped in a valid aggregation function.
     {%- set alias_base = modules.re.split(ws_as, column_str.strip())[-1] -%}
     {%- set alias = alias_base.translate(alias_base.maketrans("","", punc)).strip() -%}
 {%- else -%}
-    {%- set alias = dbt_aql.alias_column(activity_name, column, verb, relationship_selector, join_condition, n) -%}
+    {%- set alias = dbt_activity_schema.alias_column(activity_name, column, verb, relationship_selector, join_condition, n) -%}
 {%- endif -%}
 
-{%- do return(dbt_aql.column(
+{%- do return(dbt_activity_schema.column(
     activity_name=activity_name,
     stream=stream,
     column_name=column,
@@ -318,7 +318,7 @@ be wrapped in a valid aggregation function.
 {% endmacro %}
 
 {% macro _parse_filters(query) %}
-{%- set ws = dbt_aql.whitespace() -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
 {%- set ws_join = ws~"join"~ws -%}
 {%- set query_stripped = ' '~query.strip() -%}
 
@@ -342,7 +342,7 @@ be wrapped in a valid aggregation function.
 
 
 {% macro _parse_extra_joins(query) %}
-{%- set ws = dbt_aql.whitespace() -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
 {%- set extra_join_list = modules.re.split(ws~"join"~ws, " "~query) -%}
 {%- if extra_join_list|length > 1 -%}
     {%- do return(extra_join_list[1:]) -%}
@@ -352,9 +352,9 @@ be wrapped in a valid aggregation function.
 {% endmacro %}
 
 {% macro _parse_included_columns(query, stream, expected_verbs) %}
-{%- set ws = dbt_aql.whitespace() -%}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set verb, query = dbt_aql._parse_keyword(query, expected_verbs) -%}
+{%- set ws = dbt_activity_schema.whitespace() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set verb, query = dbt_activity_schema._parse_keyword(query, expected_verbs) -%}
 {%- set first_char = query.strip()[0] -%}
 {%- if first_char != "(" -%}
     {%- set error_message -%}

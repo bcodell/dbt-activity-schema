@@ -16,4 +16,4 @@ append first after bought_something(
 
 -- depends_on: {{ ref('output__select_nth_append_first_after') }}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}

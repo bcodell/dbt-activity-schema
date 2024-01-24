@@ -11,15 +11,15 @@
         the dataset_column materialized models to include in the dataset
 #}
 
-{%- set rs = dbt_aql._relationship_selectors() -%}
-{%- set av = dbt_aql._activity_verbs() -%}
-{%- set am = dbt_aql._aggregation_map() -%}
+{%- set rs = dbt_activity_schema._relationship_selectors() -%}
+{%- set av = dbt_activity_schema._activity_verbs() -%}
+{%- set am = dbt_activity_schema._aggregation_map() -%}
 {% set stream_name = stream %}
-{%- set model_prefix = dbt_aql.get_model_prefix(stream_name) -%}
+{%- set model_prefix = dbt_activity_schema.get_model_prefix(stream_name) -%}
 {%- set primary_activity_name = primary_activity.activity_name|replace(model_prefix, '') -%}
 {%- set pcl = [] -%}
 {%- for pc in primary_activity.columns -%}
-    {%- do pcl.append(dbt_aql.column(
+    {%- do pcl.append(dbt_activity_schema.column(
             activity_name=primary_activity_name,
             stream=stream_name,
             column_name=pc.column_name,
@@ -28,7 +28,7 @@
     )) -%}
 {%- endfor -%}
 
-{% set pa = dbt_aql.activity(
+{% set pa = dbt_activity_schema.activity(
     activity_name=primary_activity_name,
     stream=stream_name,
     verb=primary_activity.verb,
@@ -57,7 +57,7 @@
         {%- else -%}
             {%- set aggfunc = am[c.aggfunc] -%}
         {%- endif -%}
-        {% do co.append(dbt_aql.column(
+        {% do co.append(dbt_activity_schema.column(
             activity_name=joined_activity_name,
             stream=stream_name,
             column_name=c.column_name,
@@ -65,7 +65,7 @@
             alias=c.alias
         )) %}
     {% endfor %}
-{% set joined_activity = dbt_aql.activity(
+{% set joined_activity = dbt_activity_schema.activity(
     activity_name=joined_activity_name,
     stream=stream_name,
     verb=j.verb,
@@ -85,7 +85,7 @@
 {% endfor %}
 
 
-{{ dbt_aql._build_dataset(
+{{ dbt_activity_schema._build_dataset(
     stream=stream_name,
     primary_activity=pa,
     joined_activities=ja,

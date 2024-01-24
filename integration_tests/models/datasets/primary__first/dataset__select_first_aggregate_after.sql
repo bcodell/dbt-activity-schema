@@ -17,4 +17,4 @@ aggregate after bought_something(
 
 -- depends_on: {{ ref('output__select_first_aggregate_after') }}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}

@@ -1,4 +1,4 @@
-# **dbt-aql**
+# **dbt-activity-schema**
 A dbt package to query Activity Streams using a SQL-esque interface called `aql` - Activity Query Language. In addition to a proposed implementation of aql, it contains myriad utility functions to empower users to build entire Activity Schema data pipelines in their dbt projects.
 
 # Sponsors
@@ -41,10 +41,10 @@ Finally, given the nascent (but burgeoning) state of adoption of Activity Schema
 
 
 # **Project Configuration**
-In order to use the package, a variable called `dbt_aql` needs to be added to the project's `dbt_project.yml`. It should take the following format:
+In order to use the package, a variable called `dbt_activity_schema` needs to be added to the project's `dbt_project.yml`. It should take the following format:
 ``` yml
 vars:
-  dbt_aql:
+  dbt_activity_schema:
     column_configuration:
       included_optional_columns:
         - revenue_impact
@@ -166,30 +166,30 @@ If the Activity Schema being built is configured to skip the activity stream, th
 -- Snowflake
 {{
     config(
-        cluster_by=dbt_aql.cluster_keys()
+        cluster_by=dbt_activity_schema.cluster_keys()
     )
 }}
 
 -- Bigquery
 {{
     config(
-        partition_by=dbt_aql.cluster_keys('stream_name').partition_by,
-        cluster_by=dbt_aql.cluster_keys('stream_name').cluster_by
+        partition_by=dbt_activity_schema.cluster_keys('stream_name').partition_by,
+        cluster_by=dbt_activity_schema.cluster_keys('stream_name').cluster_by
     )
 }}
 
 -- Redshift
 {{
     config(
-        sort=dbt_aql.cluster_keys().sort,
-        dist=dbt_aql.cluster_keys().dist
+        sort=dbt_activity_schema.cluster_keys().sort,
+        dist=dbt_activity_schema.cluster_keys().dist
     )
 }}
 
 -- DuckDB
 {{
     config(
-        options={"partition_by": dbt_aql.cluster_keys()}
+        options={"partition_by": dbt_activity_schema.cluster_keys()}
     )
 }}
 ```
@@ -215,25 +215,25 @@ Each Activity model should look similar to the following:
 ```sql
 with base as (
     select
-        entity_id as {{dbt_aql.customer_column('stream_1')}},
-        created_at as {{dbt_aql.schema_columns().ts}},
+        entity_id as {{dbt_activity_schema.customer_column('stream_1')}},
+        created_at as {{dbt_activity_schema.schema_columns().ts}},
         feature_1 as feature_1_alias,
         feature_2 as feature_2_alias,
         ...
     from {{ ref('my_dbt_table') }}
 )
-{{ dbt_aql.build_activity(
+{{ dbt_activity_schema.build_activity(
     cte='base'
 )}}
 ```
 The `build_activity` macro is a convenience function that will take the data from the CTE that's passed as an argument and shape it into the standardized schema that the user has configured for the Activity model's corresponding Activity Schema. The query itself can have as much or as little business logic as necessary to define the Activity. The only expectation is that the CTE that is passed to the macro contains the following:
-* A column that is aliased to the corresponding Activity Schema's `customer` column alias. This alias can be asserted programmatically with the jinja snippet `{{dbt_aql.customer_column('stream_1')}}` as seen in the example code, or manually with code. This column will be cast as a string.
-* A column that can be cast as a timestamp that is aliased to the `ts` column alias as configured for all Activity Schema pipelines in the project. This alias can be asserted programmatically with the jinja snippet `{{dbt_aql.schema_columns().ts}}` as seen in the example code, or manually with code. This column will be cast as a timestamp.
+* A column that is aliased to the corresponding Activity Schema's `customer` column alias. This alias can be asserted programmatically with the jinja snippet `{{dbt_activity_schema.customer_column('stream_1')}}` as seen in the example code, or manually with code. This column will be cast as a string.
+* A column that can be cast as a timestamp that is aliased to the `ts` column alias as configured for all Activity Schema pipelines in the project. This alias can be asserted programmatically with the jinja snippet `{{dbt_activity_schema.schema_columns().ts}}` as seen in the example code, or manually with code. This column will be cast as a timestamp.
 * The appropriately aliased optional columns (`revenue_impact, link, anonymous_customer_id`) that are configured to be used in the stream. If an activity model doesn't use them, they can be specified in one of two ways:
   * Explicitly in the sql query (`select null as revenue_impact`)
   * By passing an argument to the `build_activity_macro` like so:
 ```
-{{ dbt_aql.build_activity(
+{{ dbt_activity_schema.build_activity(
     cte='base',
     null_columns=['revenue_impact']
 )}}
@@ -270,37 +270,37 @@ Each Activity Schema should have exactly 1 stream model. The model should be the
 **Note: This model must exist with activity model dependencies defined appropriately, regardless of how the `skip_stream` parameter is configured for the stream. This requirement is due to the way dbt determines model dependencies when parsing a project.**
 
 ## **Configuration**
-In order to maximize computational performance when querying a stream in downstream models, it is recommended to use the clustering/partition keys as recommended by the spec. A convenience macro has been provided with adapter-specific implementations to make this easy for users. To use, simply pass the `dbt_aql.cluster_keys()` to the appropriate argument in the model config block.
+In order to maximize computational performance when querying a stream in downstream models, it is recommended to use the clustering/partition keys as recommended by the spec. A convenience macro has been provided with adapter-specific implementations to make this easy for users. To use, simply pass the `dbt_activity_schema.cluster_keys()` to the appropriate argument in the model config block.
 
 Example implementations of this configuration for supported warehouses are provided below:
 ```sql
 -- Snowflake
 {{
     config(
-        cluster_by=dbt_aql.cluster_keys()
+        cluster_by=dbt_activity_schema.cluster_keys()
     )
 }}
 
 -- Bigquery
 {{
     config(
-        partition_by=dbt_aql.cluster_keys().partition_by,
-        cluster_by=dbt_aql.cluster_keys().cluster_by
+        partition_by=dbt_activity_schema.cluster_keys().partition_by,
+        cluster_by=dbt_activity_schema.cluster_keys().cluster_by
     )
 }}
 
 -- Redshift
 {{
     config(
-        sort=dbt_aql.cluster_keys().sort,
-        dist=dbt_aql.cluster_keys().dist
+        sort=dbt_activity_schema.cluster_keys().sort,
+        dist=dbt_activity_schema.cluster_keys().dist
     )
 }}
 
 -- DuckDB
 {{
     config(
-        options={"partition_by": dbt_aql.cluster_keys()}
+        options={"partition_by": dbt_activity_schema.cluster_keys()}
     )
 }}
 
@@ -311,7 +311,7 @@ Example implementations of this configuration for supported warehouses are provi
 ## **Code**
 Each Activity model should look similar to the following:
 ```sql
-{{ dbt_aql.build_stream(
+{{ dbt_activity_schema.build_stream(
     activity_list=[
         ref('prefix_1__activity_1'),
         ref('prefix_1__activity_2')
@@ -338,46 +338,46 @@ All of these inputs are still needed, and they can be viewed in the following ex
 ## **Creating Datasets Option 1: The `query_stream` Macro**
 For a macro-based approach to producing datasets, use the following syntax:
 ```sql
-{{ dbt_aql.query_stream(
+{{ dbt_activity_schema.query_stream(
     stream='stream_1',
-    primary_activity=dbt_aql.primary_activity(
+    primary_activity=dbt_activity_schema.primary_activity(
         activity='activity_1',
         columns=[
-            dbt_aql.dc(
+            dbt_activity_schema.dc(
                 column_name='ts',
                 alias='activity_1_at',
             ),
-            dbt_aql.dc(
+            dbt_activity_schema.dc(
                 column_name='feature_2'
             ),
-            dbt_aql.dc(
+            dbt_activity_schema.dc(
                 column_name='feature_3',
             ),
         ],
         filters=[] -- optional (empty list is default)
     ),
     joined_activities=[
-        dbt_aql.appended_activity(
+        dbt_activity_schema.appended_activity(
             activity='activity_2',
             relationship_selector='first', -- only needed for appended activities
             join_condition='ever',
             columns=[
-                dbt_aql.dc(
+                dbt_activity_schema.dc(
                     column_name='ts',
                     alias='first_ever_activity_2_at'
                 )
             ]
         ),
-        dbt_aql.aggregated_activity(
+        dbt_activity_schema.aggregated_activity(
             activity='activity_3',
             join_condition='after',
             columns=[
-                dbt_aql.dc(
+                dbt_activity_schema.dc(
                     column_name='activity_id',
                     aggfunc='count',
                     alias='count_activity_3_after'
                 ),
-                dbt_aql.dc(
+                dbt_activity_schema.dc(
                     column_name='feature_x',
                     aggfunc='sum',
                     alias='sum_feature_x_after'
@@ -476,7 +476,7 @@ aggregate after activity_3 (
 )
 {% endset %}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}
 ```
 
 Syntax details are provided below.
@@ -688,7 +688,7 @@ aggregate after bought_something (
 
 {{config(materialized='dataset_column', aql=aql)}}
 
-{{ dbt_aql.dataset_column(aql) }}
+{{ dbt_activity_schema.dataset_column(aql) }}
 ```
 
 ### `include` join method
@@ -725,7 +725,7 @@ select first visited_page (
     ts as first_visited_google_at
     -- json_extract will be rendered appropriately based on the target
     -- keys passed to json_extract should be wrapped in quotes
-    filter {{dbt_aql.json_extract('{feature_json}', 'referrer_url')}} = 'google.com'
+    filter {{dbt_activity_schema.json_extract('{feature_json}', 'referrer_url')}} = 'google.com'
 )
 append first ever visited_page (
     ts as first_2023_page_visit_at
@@ -735,8 +735,8 @@ aggregate all bought_something (
     count(activity_id) as total_large_purchases_after
     -- typecasting to non-string types (e.g. int) require including a nullif clause and an explicit typecast
     -- initiate each filter criteria with a filter keyword (not and)
-    filter nullif({{dbt_aql.json_extract('{feature_json}', 'total_sales')}}, '')::int > 100
-    filter nullif({{dbt_aql.json_extract('{feature_json}', 'total_items_purchased')}}, '')::int > 3
+    filter nullif({{dbt_activity_schema.json_extract('{feature_json}', 'total_sales')}}, '')::int > 100
+    filter nullif({{dbt_activity_schema.json_extract('{feature_json}', 'total_items_purchased')}}, '')::int > 3
 )
 ```
 
@@ -765,18 +765,18 @@ For developers who would like to contribute to this project, follow the instruct
 3. Set the repo as the working directory
 4. Run `poetry init` to install dependencies
 5. Activate a virtual environment if not activated by default from previous step (`poetry shell`)
-6. Set the working directory to `dbt-aql/integration_tests` and run `dbt deps`
+6. Set the working directory to `dbt-activity-schema/integration_tests` and run `dbt deps`
 
 ### Postgres Setup
 1. Install Postgres (`brew install postgresql@15` or similar version for MacOS/Homebrew, or [download the Postgres App](https://postgresapp.com/downloads.html))
 2. Start Postgres on port 5432 (should be default - `brew services start postgresql@15` if using Homebrew)
-3. Create a database called `dbt_aql_integration_tests`
+3. Create a database called `dbt_activity_schema_integration_tests`
 
 ### Bigquery Setup
 1. Create a GCP account if you don't have one already
 2. Create a Bigquery project if you don't have one already
 3. Create a Bigquery service account if you don't have one already
-4. Obtain a JSON keyfile for the service account and save it at the path `dbt-aql/integration_tests/gcp_keyfile.json`
+4. Obtain a JSON keyfile for the service account and save it at the path `dbt-activity-schema/integration_tests/gcp_keyfile.json`
 5. Add the environment variable `GCP_KEYFILE_PATH=./gcp_keyfile.json`
 
 ## Testing

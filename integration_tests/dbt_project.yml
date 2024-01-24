@@ -1,6 +1,6 @@
 
 # Project Name
-name: dbt_aql_integration_tests
+name: dbt_activity_schema_integration_tests
 version: '1.0.0'
 
 # This setting configures which "profile" dbt uses for this project.
@@ -20,7 +20,7 @@ models:
   +format: csv
 
 vars:
-  dbt_aql:
+  dbt_activity_schema:
     column_configuration:
       included_optional_columns:
         - revenue_impact
@@ -36,11 +36,11 @@ vars:
 
 
 seeds:
-  dbt_aql_integration_tests:
+  dbt_activity_schema_integration_tests:
     datasets:
       +column_types:
         customer_id: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
 
 dispatch:
   - macro_namespace: dbt
-    search_order: ['dbt_aql_integration_tests', 'dbt_aql', 'dbt']
+    search_order: ['dbt_activity_schema_integration_tests', 'dbt_activity_schema', 'dbt']

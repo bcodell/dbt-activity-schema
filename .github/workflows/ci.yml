@@ -49,7 +49,7 @@ jobs:
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - snowflake - with stream
         id: snowflake_ci_with_stream
-        if: github.repository == 'bcodell/dbt-aql'
+        if: github.repository == 'bcodell/dbt-activity-schema'
         run: |
           localstack extensions install localstack-extension-snowflake
           localstack start -d
@@ -62,7 +62,7 @@ jobs:
 
       - name: dbt CI - snowflake - skip stream
         id: snowflake_ci_skip_stream
-        if: github.repository == 'bcodell/dbt-aql'
+        if: github.repository == 'bcodell/dbt-activity-schema'
         run: |
           cd ./integration_tests
           sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml
@@ -75,7 +75,7 @@ jobs:
         if: failure() && (steps.snowflake_ci_with_stream.outcome == 'failure' || steps.snowflake_ci_skip_stream.outcome == 'failure' )
         run: localstack logs
       - name: dbt CI - bigquery - with stream
-        if: github.repository == 'bcodell/dbt-aql'
+        if: github.repository == 'bcodell/dbt-activity-schema'
         run: |
           cd ./integration_tests
           sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
@@ -86,7 +86,7 @@ jobs:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - bigquery - skip stream
-        if: github.repository == 'bcodell/dbt-aql'
+        if: github.repository == 'bcodell/dbt-activity-schema'
         run: |
           cd ./integration_tests
           sed -i 's/skip_stream: false/skip_stream: true/' dbt_project.yml

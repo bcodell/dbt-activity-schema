@@ -1,5 +1,5 @@
 {% macro aggfunc_min(column) %}
-    {{ return(adapter.dispatch("aggfunc_min", "dbt_aql")(column))}}
+    {{ return(adapter.dispatch("aggfunc_min", "dbt_activity_schema")(column))}}
 {% endmacro %}
 
 {% macro default__aggfunc_min(column) %}
