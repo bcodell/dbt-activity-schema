@@ -34,7 +34,7 @@ Numerous projects influenced the design of this one. Such projects include:
 - [Activity Schema Spec](https://github.com/ActivitySchema/ActivitySchema)
 - [Prql](https://prql-lang.org/)
 - The [activity schema dbt package](https://github.com/tnightengale/dbt-activity-schema) from @tnightengale
-- My own prior implementation of an [activity schema dbt package](https://github.com/bcodell/dbt-activity-schema)
+- My own prior implementation of an [activity schema dbt package](https://github.com/bcodell/DEPRECATED-dbt-activity-schema-old)
 
 
 # **Implementation Design Decisions**
