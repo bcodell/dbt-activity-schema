@@ -17,14 +17,14 @@ integration_tests:
       port: 5432
       user: ""
       pass: ""
-      dbname: dbt_aql_integration_tests
+      dbname: dbt_activity_schema_integration_tests
       schema: main
 
     bigquery:
       type: bigquery
       method: service-account
-      project: dbt-aql
-      dataset: dbt_aql_integration_tests
+      project: dbt-activity-schema
+      dataset: dbt_activity_schema_integration_tests
       threads: 4 # Must be a value of 1 or greater
       keyfile: "{{ env_var('GCP_KEYFILE_PATH') }}"
       OPTIONAL_CONFIG: VALUE

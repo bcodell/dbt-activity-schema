@@ -1,5 +1,5 @@
 {%- macro generate_activity_id(field_list) -%}
-    {{ return(adapter.dispatch('generate_activity_id', 'dbt_aql')(field_list)) }}
+    {{ return(adapter.dispatch('generate_activity_id', 'dbt_activity_schema')(field_list)) }}
 {% endmacro %}
 
 {%- macro default__generate_activity_id(field_list) -%}

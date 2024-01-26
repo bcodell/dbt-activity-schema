@@ -1,4 +1,4 @@
-{% set keys = dbt_aql.cluster_keys(stream='customer_stream') %}
+{% set keys = dbt_activity_schema.cluster_keys(stream='customer_stream') %}
 {% if target.name == 'bigquery' %}
     {% set cluster_keys = keys.cluster_by %}
     {% set partition_keys = keys.partition_by %}
@@ -25,4 +25,4 @@ with base as (
     select *
     from {{ ref('bought_something') }}
 )
-{{ dbt_aql.build_activity('base', null_columns=['anonymous_customer_id','revenue_impact', 'link'])}}
+{{ dbt_activity_schema.build_activity('base', null_columns=['anonymous_customer_id','revenue_impact', 'link'])}}

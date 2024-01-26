@@ -13,4 +13,4 @@ append nth(2) after visited_page (
 
 -- depends_on: {{ ref('output__select_nth_append_nth_after') }}
 
-{{ dbt_aql.dataset(aql) }}
+{{ dbt_activity_schema.dataset(aql) }}

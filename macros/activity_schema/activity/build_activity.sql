@@ -4,7 +4,7 @@ build_activity: Compiles a final select statement in a standardized format so th
 #}
 
 {% macro build_activity(cte, unique_id_column=none, null_columns=[]) %}
-{{ return(adapter.dispatch('build_activity', 'dbt_aql')(cte, unique_id_column, null_columns)) }}
+{{ return(adapter.dispatch('build_activity', 'dbt_activity_schema')(cte, unique_id_column, null_columns)) }}
 {% endmacro %}
 
 
@@ -32,13 +32,13 @@ Accepted values are one of {{accepted_values_str}}, but received '{{nc}}'
 
 
 {%- if execute -%}
-    {%- set columns = dbt_aql.schema_columns(stream=stream) -%}
+    {%- set columns = dbt_activity_schema.schema_columns(stream=stream) -%}
 {%- else -%}
-    {%- set columns = dbt_aql.schema_columns() -%}
+    {%- set columns = dbt_activity_schema.schema_columns() -%}
 {%- endif -%}
 
 {%- set model_name_raw = model.name -%}
-{% set model_name = dbt_aql.clean_activity_name(stream, model.name) %}
+{% set model_name = dbt_activity_schema.clean_activity_name(stream, model.name) %}
 
 
 {%- set ts = columns.ts -%}
@@ -48,13 +48,13 @@ Accepted values are one of {{accepted_values_str}}, but received '{{nc}}'
 {%- endif -%}
 
 {%- set surrogate_key_statement -%}
-cast({{ dbt_aql.generate_activity_id(surrogate_key_fields) }} as {{dbt.type_string()}})
+cast({{ dbt_activity_schema.generate_activity_id(surrogate_key_fields) }} as {{dbt.type_string()}})
 {%- endset -%}
 
 {%- if execute -%}
-    {%- set schema_column_types = dbt_aql.schema_column_types(stream) -%}
+    {%- set schema_column_types = dbt_activity_schema.schema_column_types(stream) -%}
 {%- else -%}
-    {%- set schema_column_types = dbt_aql.schema_column_types() -%}
+    {%- set schema_column_types = dbt_activity_schema.schema_column_types() -%}
 {%- endif -%}
 
 
@@ -84,7 +84,7 @@ select
     , cast(null as {{schema_column_types[columns.link]}}) as {{columns.link}}
         {% endif %}
     {% endif %}
-    , {{ dbt_aql.build_json(data_types) }} as {{columns.feature_json}}
+    , {{ dbt_activity_schema.build_json(data_types) }} as {{columns.feature_json}}
     , row_number() over (
         {% if columns.anonymous_customer_id is not defined or 'anonymous_customer_id' in null_columns %}
         partition by {{columns.customer}}

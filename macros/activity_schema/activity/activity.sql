@@ -10,8 +10,8 @@
     extra_joins=none
 ) %}
 
-{%- set join_clauses = dbt_aql._join_clause_map() -%}
-{%- set relationship_clauses = dbt_aql._relationship_clause_map() -%}
+{%- set join_clauses = dbt_activity_schema._join_clause_map() -%}
+{%- set relationship_clauses = dbt_activity_schema._relationship_clause_map() -%}
 {%- if join_condition is not none -%}
     {%- set join_clause = join_clauses[join_condition]() -%}
 {%- else -%}
@@ -29,11 +29,12 @@ aql query in model '{{ model.unique_id }}' has invalid syntax. Parsed invalid re
 {%- else -%}
     {%- set relationship_clause = none -%}
 {%- endif -%}
-{%- set model_prefix = dbt_aql.get_model_prefix(stream) -%}
+{%- set model_prefix = dbt_activity_schema.get_model_prefix(stream) -%}
 {%- if modules.re.search(model_prefix, activity_name) is none -%}
     {%- set model_name = model_prefix~activity_name -%}
 {%- else -%}
     {%- set model_name = activity_name -%}
+    {%- set activity_name = model_name|replace(model_prefix, '') -%}
 {%- endif -%}
 
 

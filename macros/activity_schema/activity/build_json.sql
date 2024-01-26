@@ -1,5 +1,5 @@
 {%- macro build_json(data_types) -%}
-    {{ return(adapter.dispatch('build_json', 'dbt_aql')(data_types)) }}
+    {{ return(adapter.dispatch('build_json', 'dbt_activity_schema')(data_types)) }}
 {%- endmacro -%}
 
 

@@ -1,9 +1,9 @@
 {% macro cluster_keys(stream=none) %}
-    {{ return(adapter.dispatch('cluster_keys', 'dbt_aql')(stream)) }}
+    {{ return(adapter.dispatch('cluster_keys', 'dbt_activity_schema')(stream)) }}
 {% endmacro %}
 
 {% macro default__cluster_keys(stream=none) %}
-{%- set columns = dbt_aql.schema_columns() -%}
+{%- set columns = dbt_activity_schema.schema_columns() -%}
 {%- set cluster_cols = [
     columns.activity,
     columns.activity_occurrence~" in (1, null)",
@@ -14,8 +14,8 @@
 {% endmacro %}
 
 {% macro snowflake__cluster_keys(stream=none) %}
-{%- set streams = var("dbt_aql").get("streams", {}).keys() -%}
-{%- set columns = dbt_aql.schema_columns() -%}
+{%- set streams = var("dbt_activity_schema").get("streams", {}).keys() -%}
+{%- set columns = dbt_activity_schema.schema_columns() -%}
 
 {%- if model.name in streams -%}
 {%- set cluster_cols = [
@@ -35,8 +35,8 @@
 {% endmacro %}
 
 {% macro bigquery__cluster_keys(stream=none) %}
-{%- set columns = dbt_aql.schema_columns() -%}
-{%- set streams = var("dbt_aql").get("streams", {}).keys() -%}
+{%- set columns = dbt_activity_schema.schema_columns() -%}
+{%- set streams = var("dbt_activity_schema").get("streams", {}).keys() -%}
 
 {# throw error if no stream passed as input and model name is not a stream #}
 {%- if model.name not in streams and stream == none -%}
@@ -52,13 +52,13 @@ passed to the 'cluster_keys' macro in each activity model.
 {%- set cluster_cols = [
     columns.activity,
     columns.activity_occurrence,
-    dbt_aql.customer_column(model.name)
+    dbt_activity_schema.customer_column(model.name)
 ] -%}
 {%- else -%}
 {# cluster activity #}
 {%- set cluster_cols = [
     columns.activity_occurrence,
-    dbt_aql.customer_column(stream)
+    dbt_activity_schema.customer_column(stream)
 ] -%}
 {%- endif -%}
 {%- set partition_cols = {
@@ -70,8 +70,8 @@ passed to the 'cluster_keys' macro in each activity model.
 {% endmacro %}
 
 {% macro redshift__cluster_keys(stream=none) %}
-{%- set streams = var("dbt_aql").get("streams", {}).keys() -%}
-{%- set columns = dbt_aql.schema_columns() -%}
+{%- set streams = var("dbt_activity_schema").get("streams", {}).keys() -%}
+{%- set columns = dbt_activity_schema.schema_columns() -%}
 
 {%- if model.name in streams -%}
 {%- set cluster_cols = [
@@ -90,8 +90,8 @@ passed to the 'cluster_keys' macro in each activity model.
 
 
 {% macro duckdb__cluster_keys(stream=none) %}
-{%- set streams = var("dbt_aql").get("streams", {}).keys() -%}
-{%- set columns = dbt_aql.schema_columns() -%}
+{%- set streams = var("dbt_activity_schema").get("streams", {}).keys() -%}
+{%- set columns = dbt_activity_schema.schema_columns() -%}
 
 {%- if model.name in streams -%}
 {%- set cluster_cols = [

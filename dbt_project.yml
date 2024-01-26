@@ -1,4 +1,4 @@
-name: "dbt_aql"
+name: "dbt_activity_schema"
 version: "0.2.0"
 
 config-version: 2

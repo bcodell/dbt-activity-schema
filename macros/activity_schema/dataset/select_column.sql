@@ -1,20 +1,20 @@
 {% macro select_column(stream, table_alias, column) %}
-    {{ return(adapter.dispatch("select_column", "dbt_aql")(stream, table_alias, column))}}
+    {{ return(adapter.dispatch("select_column", "dbt_activity_schema")(stream, table_alias, column))}}
 {% endmacro %}
 
 {% macro default__select_column(stream, table_alias, column) %}
-{%- set columns = dbt_aql.schema_columns(stream) -%}
+{%- set columns = dbt_activity_schema.schema_columns(stream) -%}
 
 {%- if column.column_name not in columns.values() -%}
 {%- set column_sql -%}
-cast(nullif({{dbt_aql.json_extract(table_alias ~ '.' ~ columns.feature_json, column.column_name)}}, '') as {{column.data_type}})
+cast(nullif({{dbt_activity_schema.json_extract(table_alias ~ '.' ~ columns.feature_json, column.column_name)}}, '') as {{column.data_type}})
 {%- endset -%}
 {%- set data_type = column.data_type -%}
 {%- else -%}
 {%- set column_sql -%}
 {{table_alias}}.{{column.column_name}}
 {%- endset -%}
-{%- set data_type = dbt_aql.schema_column_types(stream).get(column.column_name, dbt.type_string()) -%}
+{%- set data_type = dbt_activity_schema.schema_column_types(stream).get(column.column_name, dbt.type_string()) -%}
 {%- endif -%}
 {%- do return(namespace(
     name="selected_column",
@@ -24,7 +24,7 @@ cast(nullif({{dbt_aql.json_extract(table_alias ~ '.' ~ columns.feature_json, col
 {% endmacro %}
 
 {% macro json_extract(json_col, key) %}
-    {{ return(adapter.dispatch("json_extract", "dbt_aql")(json_col, key))}}
+    {{ return(adapter.dispatch("json_extract", "dbt_activity_schema")(json_col, key))}}
 {% endmacro %}
 
 {# params

@@ -1,4 +1,4 @@
-{% set keys = dbt_aql.cluster_keys() %}
+{% set keys = dbt_activity_schema.cluster_keys() %}
 {% if target.name == 'bigquery' %}
     {% set cluster_keys = keys.cluster_by %}
     {% set partition_keys = keys.partition_by %}
@@ -23,4 +23,4 @@
     ref('customer__visited_page'),
 ] %}
 
-{{ dbt_aql.build_stream(activity_list) }}
+{{ dbt_activity_schema.build_stream(activity_list) }}
