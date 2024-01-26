@@ -11,7 +11,7 @@
 -- Get column descriptions and tests
 {% macro get_column_descriptions(activity) %}
   {% set stream = get_activity_config(activity).stream %}
-  {% set schema_columns = dbt_aql.schema_columns(stream) %}
+  {% set schema_columns = dbt_activity_schema.schema_columns(stream) %}
 
   {% set columns = [
       {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
