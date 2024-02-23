@@ -3,5 +3,5 @@
 {% endmacro %}
 
 {% macro default__aggfunc_sum_bool(column) %}
-sum(cast({{ column.column_sql }} as {{type_boolean()}}))
+sum(cast({{ column.column_sql }} as {{type_int()}}))
 {% endmacro %}
