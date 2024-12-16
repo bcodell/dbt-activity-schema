@@ -38,7 +38,7 @@
         {% for feature in features -%}
         {% if not loop.first -%}', '|| {%- endif -%}'"{{feature}}": "' || decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})){% if not loop.last %} ||'"'{% endif %}
         {% endfor -%}
-    || '}'
+    || '"}'
     {%- else -%}
     cast(null as varchar)
     {%- endif -%}
