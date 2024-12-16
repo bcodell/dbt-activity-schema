@@ -22,7 +22,7 @@
     {%- set features = data_types.keys() -%}
     json_build_object(
         {% for feature in features -%}
-        '{{features}}', {{feature}}{% if not loop.last -%},{% endif %}
+        '{{feature}}', {{feature}}{% if not loop.last -%},{% endif %}
         {% endfor -%}
     )
     {%- else -%}
