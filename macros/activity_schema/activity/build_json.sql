@@ -22,7 +22,7 @@
     {%- set features = data_types.keys() -%}
     json_build_object(
         {% for feature in features -%}
-        '{{feature}}', {{feature}}{% if not loop.last -%},{% endif %}
+        '{{features}}', {{feature}}{% if not loop.last -%},{% endif %}
         {% endfor -%}
     )
     {%- else -%}
@@ -37,7 +37,7 @@
     '{' || 
         {%- for feature in features -%}
         {%- if not loop.first -%}', '{% endif -%}
-        '"'||{{ feature }}||'": "' || cast({{ feature }} as {{ dbt.type_string() }}) || '"'{%- if not loop.last -%}||{% endif %} 
+        '"'||{{ feature }}||'": "' || decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})) || '"'{%- if not loop.last -%}||{% endif %} 
         {%- endfor -%}
     || '}'
     {%- else -%}
