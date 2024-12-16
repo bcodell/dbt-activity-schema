@@ -37,7 +37,7 @@
     '{' || 
         {%- for feature in features -%}
         {%- if not loop.first -%}', '{% endif -%}
-        '"'||{{ feature }}||'": "' || cast({{ feature }} as {{ dbt.type_string() }}) || '"'{%- if not loop.last -%},{% endif %} 
+        '"'||{{ feature }}||'": "' || cast({{ feature }} as {{ dbt.type_string() }}) || '"'{%- if not loop.last -%}||{% endif %} 
         {%- endfor -%}
     || '}'
     {%- else -%}
