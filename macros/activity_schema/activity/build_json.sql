@@ -36,13 +36,14 @@
     {%- set features = data_types.keys() -%}
     '{' ||
         {% for feature in features -%}
-        {% if not loop.first -%}', '{%- endif -%}'"{{feature}}": "' || decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})){% if not loop.last %} ||{% endif %}
+        {% if not loop.first -%}', '|| {%- endif -%}'"{{feature}}": "' || decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})){% if not loop.last %} ||'"'{% endif %}
         {% endfor -%}
-    || '}'
+    || '"}'
     {%- else -%}
     cast(null as varchar)
     {%- endif -%}
 {%- endmacro -%}
+
 
 
 {%- macro bigquery__build_json(data_types) -%}
