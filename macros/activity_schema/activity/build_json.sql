@@ -34,13 +34,13 @@
 {%- macro redshift__build_json(data_types) -%}
     {%- if data_types is not none -%}
     {%- set features = data_types.keys() -%}
-    '{' ||
+    json_parse('{' ||
         {% for feature in features -%}
         {% if not loop.first -%}', '|| {%- endif -%}'"{{feature}}": "' || decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})){% if not loop.last %} ||'"'{% endif %}
         {% endfor -%}
-    || '"}'
+    || '"}')
     {%- else -%}
-    cast(null as varchar)
+    cast(null as super)
     {%- endif -%}
 {%- endmacro -%}
 
