@@ -40,7 +40,7 @@
         {% endfor -%}
     || '"}')
     {%- else -%}
-    cast(null as varchar)
+    cast(null as super)
     {%- endif -%}
 {%- endmacro -%}
 
