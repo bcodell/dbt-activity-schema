@@ -44,3 +44,7 @@ json_value({{ json_col }}.{{key}})
 {%- macro snowflake__json_extract(json_col, key) -%}
 to_varchar(get_path({{json_col}}, '{{key}}'))
 {%- endmacro -%}
+
+{%- macro redshift__json_extract(json_col, key) -%}
+CAST({{json_col}}.{{key}} AS varchar) 
+{%- endmacro -%}
