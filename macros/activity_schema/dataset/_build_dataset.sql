@@ -133,7 +133,7 @@ select * from number_spine),
         {% endif %}
         {{columns.ts}} as {{req}}{{columns.ts}},
         {{columns.activity_occurrence}} as {{req}}{{columns.activity_occurrence}},
-        {{columns.activity_repeated_at}} as {{req}}{{columns.activity_repeated_at}},
+        {{columns.activity_repeated_at}} as {{req}}{{columns.activity_repeated_at}}
     from time_spine_entities tse
     left join number_spine ns
         on tse.active_periods >= ns.n
