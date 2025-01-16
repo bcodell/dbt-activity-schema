@@ -19,7 +19,8 @@
     nth="nth",
     last="last",
     all="all",
-    selector_list=["first", "nth", "last", "all"]
+    time_spine="time_spine",
+    selector_list=["first", "nth", "last", "all", "time_spine"]
 )) -%}
 
 {% endmacro %}

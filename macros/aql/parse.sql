@@ -125,6 +125,13 @@ vars:
     {%- else -%}
         {%- set nth = none -%}
     {%- endif -%}
+    {%- if relationship_selector == rs.registry.time_spine -%}
+        {%- set interval, end_period, rest = dbt_activity_schema._parse_time_spine(rest) -%}
+    {%- else -%}
+        {%- set interval = none -%}
+        {%- set end_period = none -%}
+    {%- endif -%}
+
 
 {%- elif verb == av.append -%}
     {%- set relationship_selector, rest = dbt_activity_schema._parse_keyword(query, rs.append) -%}
@@ -179,7 +186,9 @@ vars:
     columns=columns,
     nth=nth,
     filters=filters,
-    extra_joins=extra_joins
+    extra_joins=extra_joins,
+    interval=interval,
+    end_period=end_period
 ), query_rest)) -%}
 
 {% endmacro %}
@@ -204,6 +213,75 @@ Error: relationship selector 'nth' expects numeric value. Got '{{nth_raw}}'
         {%- do return((nth_raw.strip(), query[str_len:].strip())) -%}
     {%- endif -%}
 {%- endif -%}
+{% endmacro %}
+
+
+{% macro _parse_time_spine(query) %}
+{%- set opening = query[0] -%}
+{%- if opening != "(" -%}
+    {%- set error_message -%}
+Error: relationship selector 'time_spine' should be followed by '('. Got '{{opening}}'
+    {%- endset -%}
+    {{ exceptions.raise_compiler_error(error_message) }}
+{%- endif -%}
+
+{%- set split_string = modules.re.split("\)", query[1:]) -%}
+{%- set args_raw = split_string[0] -%}
+{%- set rest = split_string[1].strip()~')' -%}
+{%- set args_split = modules.re.split(",", args_raw) -%}
+{%- set arg_split_len = args_split|length -%}
+{%- set arg_dict = {} -%}
+
+{%- if args_split|length != 2 -%}
+{%- set error_message -%}
+Error: relationship selector 'time_spine' should have two arguments, 'interval', and 'end_period'. Got arguments '{{args_raw}}'
+{%- endset -%}
+{{ exceptions.raise_compiler_error(error_message) }}
+{%- endif -%}
+
+{%- for arg in args_split -%}
+{%- set split_arg = modules.re.split("=", arg) -%}
+{%- set kw = split_arg[0].strip() -%}
+
+{%- if kw not in ["interval", "end_period"] -%}
+{%- set error_message -%}
+Error: relationship selector 'time_spine' argument should explicitly specify arguments 'interval', and 'end_period'. Got '{{kw}}'.
+{%- endset -%}
+{{ exceptions.raise_compiler_error(error_message) }}
+{%- endif -%}
+
+{%- set val = split_arg[1].strip() -%}
+{%- if kw == "interval" -%}
+    {%- set intervals = ["day", "week", "month", "quarter", "year"] -%}
+
+    {%- if val not in intervals -%}
+    {%- set error_message -%}
+Error: relationship selector 'time_spine' argument 'interval' expects one of '{{intervals}}'. Got '{{val}}'.
+    {%- endset -%}
+    {{ exceptions.raise_compiler_error(error_message) }}
+    {%- endif -%}
+
+    {%- do arg_dict.update({"interval": val}) -%}
+{%- elif kw == "end_period" -%}
+    {%- set end_periods = ["max", "current"] -%}
+
+    {%- if val not in end_periods -%}
+    {%- set error_message -%}
+Error: relationship selector 'time_spine' argument 'end_period' expects one of '{{end_periods}}'. Got '{{val}}'.
+    {%- endset -%}
+    {{ exceptions.raise_compiler_error(error_message) }}
+    {%- endif -%}
+    {%- do arg_dict.update({"end_period": val}) -%}
+
+{%- else -%}
+    {%- set error_message -%}
+Error: relationship selector 'time_spine' expects arguments 'interval', and 'end_period' expects one of '{{end_periods}}'. Got '{{val}}'.
+    {%- endset -%}
+    {{ exceptions.raise_compiler_error(error_message) }}
+{%- endif -%}
+
+{%- endfor -%}
+{%- do return((arg_dict["interval"], arg_dict["end_period"], rest)) -%}
 {% endmacro %}
 
 

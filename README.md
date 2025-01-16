@@ -647,6 +647,39 @@ Each included column can optionally be aliased to a whitespace-free friendly nam
 
 # **Advanced Usage**
 
+## **Combining SQL and AQL**
+AQL is meant to be a SQL-esque way to seamlessly and consistently transform data from event structures to the denormalized structure needed for analysis and visualization tasks. But there are cases where AQL alone can't produce the desired dataset - for example, building a pre-aggregated table (e.g. weekly or monthly) or combining data from multiple entities/streams. For these cases, having an escape hatch is essential, and the obvious choice here is SQL. And since AQL simply renders to SQL during the dbt compilation process, the two can be combined within a single model. It's as easy as wrapping the `dbt_activity_schema.dataset` macro call in a CTE. See the example below for a basic idea:
+
+```sql
+{% set aql %}
+select all bought_something (
+    activity_id as activity_id,
+    entity_uuid as customer_id,
+    ts as bought_something_at,
+    revenue_impact as order_revenue
+    -- json_extract will be rendered appropriately based on the target
+    -- keys passed to json_extract should be wrapped in quotes
+)
+append first ever visited_page (
+    ts as first_page_visit_at
+    filter {ts} >= '2023-01-01'
+)
+{% endset %}
+
+
+with base as ( -- wrap the dataset macro with a CTE
+    {{dbt_activity_schema.dataset(aql=aql)}} -- this macro renders to sql
+)
+-- apply an arbitrary follow-up sql transformation
+select
+    date_trunc('month', first_page_visit_at)::date as first_pageview_month,
+    count(distinct customer_id) as total_customers,
+    sum(order_revenue) as total_revenue,
+    total_revenue/total_customers as revenue_per_customer
+from base
+group by 1
+```
+
 ## **Extra Join Criteria for Joined Activities**
 Example code:
 ```sql
@@ -754,6 +787,29 @@ aggregate all bought_something (
     filter nullif({{dbt_activity_schema.json_extract('{feature_json}', 'total_items_purchased')}}, '')::int > 3
 )
 ```
+
+## **Building Datasets Over Time**
+As of version 0.5.0, there is an AQL-centric way to do this - the `time_spine` relationship selector for the primary activity. See code example and relevant arguments below for use:
+```sql
+using customer_stream
+select time_spine(interval=month, end_period=current) visited_page (
+    entity_uuid as customer_id
+)
+aggregate between visited_page (
+    count(activity_id) as monthly_page_visits
+)
+aggregate between bought_something (
+    sum(revenue_impact) as monthly_revenue
+)
+```
+The above will produce a dataset with one row per entity per month for all entities who have at least one `visited_page` activity, starting with the month of their first event and up until the current month (as of when the query is executed), with all months included. The timestamp is included in the output, as are all of the columns defined in the AQL statement. Appending and aggregating joined activities operates as normal. This feature effectively allows the developer to create a synthetic event that they can use for easy construction of datasets used for time series reporting and analysis. Usage notes:
+
+#### Arguments:
+* __interval__: the frequency of time in the time spine. Currently supports `day, week, month, quarter, year`.
+* __end_period__: the last period to use for a given entity instance. Options are `max` - which uses the last observed period for each entity in the specified activity, or `current` - which goes up to the current time period at which the query is run. For `max`, different entity instances will have different last periods, while for `current` the last period is the same for all entities.
+
+#### Functionality Notes:
+* The query will ensure one row per entity-period even if the entity has no events in a given period. In the above example, if customer *1* has a pageview in January 2024 but not February 2024, there will still be a row for customer *1* and time period February 2024 in the resulting dataset.
 
 ## **Adding Custom Aggregation Functions**
 Placeholder. Documentation coming soon.
