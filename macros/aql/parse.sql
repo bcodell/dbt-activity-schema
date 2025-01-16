@@ -379,7 +379,7 @@ be wrapped in a valid aggregation function.
 
 {%- set ws_as = ws~"as"~ws -%}
 {%- if modules.re.search(ws_as, column_str, modules.re.IGNORECASE) is not none -%}
-    {%- set alias_base = modules.re.split(ws_as, column_str.strip())[-1] -%}
+    {%- set alias_base = modules.re.split(ws_as, column_str.strip(), modules.re.IGNORECASE)[-1] -%}
     {%- set alias = alias_base.translate(alias_base.maketrans("","", punc)).strip() -%}
 {%- else -%}
     {%- set alias = dbt_activity_schema.alias_column(activity_name, column, verb, relationship_selector, join_condition, n) -%}
