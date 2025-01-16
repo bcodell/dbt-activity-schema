@@ -2,19 +2,21 @@
 name = "dbt-activity-schema"
 version = "0.2.0"
 description = "A dbt package to query Activity Streams using a SQL-esque interface."
-authors = ["Bryce Codell <bryce.codell@24analytics.co"]
+authors = ["Bryce Codell <bryce.codell@24analytics.co>"]
 license = "GNU"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.10"
-dbt-duckdb = "~1.7"
-dbt-postgres = "~1.7"
-dbt-bigquery = "~1.7"
+python = "^3.12.8"
+dbt-duckdb = "~1.8"
+dbt-postgres = "~1.8"
+dbt-bigquery = "~1.8"
 localstack = "~3.0"
-dbt-snowflake = "~1.7"
+dbt-snowflake = "~1.8"
 cryptography = "~43.0.1"
 sqlparse = "~0.5.0"
+setuptools = "^75.8.0"
 
 [build-system]
 requires = ["poetry-core"]

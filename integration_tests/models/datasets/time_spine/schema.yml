@@ -4,7 +4,7 @@ models:
 
   - name: dataset__time_spine
     description: A test to validate the functionality of macro-based dataset generation.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__time_spine")
           compare_columns:

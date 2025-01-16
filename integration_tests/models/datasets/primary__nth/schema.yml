@@ -4,100 +4,100 @@ models:
 
   - name: dataset__select_nth_aggregate_after
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and aggregates after to a joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_aggregate_after")
 
   - name: dataset__select_nth_aggregate_all
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and aggregates all to a joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_aggregate_all")
 
   - name: dataset__select_nth_aggregate_before
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and aggregates before to a joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_aggregate_before")
 
   - name: dataset__select_nth_aggregate_between
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and aggregates between to a joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_aggregate_between")
 
 
   - name: dataset__select_nth_append_first_after
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a first after joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_first_after")
 
   - name: dataset__select_nth_append_first_before
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a first before joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_first_before")
 
   - name: dataset__select_nth_append_first_between
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a first between joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_first_between")
 
   - name: dataset__select_nth_append_first_ever
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a first ever joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_first_ever")
 
 
   - name: dataset__select_nth_append_nth_after
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends an nth after joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_nth_after")
 
   - name: dataset__select_nth_append_nth_before
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends an nth before joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_nth_before")
 
   - name: dataset__select_nth_append_nth_between
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends an nth between joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_nth_between")
 
   - name: dataset__select_nth_append_nth_ever
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends an nth ever joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_nth_ever")
 
 
   - name: dataset__select_nth_append_last_after
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a last after joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_last_after")
 
   - name: dataset__select_nth_append_last_before
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a last before joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_last_before")
 
   - name: dataset__select_nth_append_last_between
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a last between joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_last_between")
 
   - name: dataset__select_nth_append_last_ever
     description: A test to validate compatibility of a dataset that selects the nth(1) instance of a primary activity and appends a last ever joined activity.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__select_nth_append_last_ever")
 
