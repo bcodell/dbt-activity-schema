@@ -4,13 +4,13 @@ models:
 
   - name: dataset__filtered__query_stream_macro
     description: A test to validate the functionality of macro-based dataset generation.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__filtered__query_stream_macro")
 
   - name: dataset__joined__query_stream_macro
     description: A test to validate the functionality of macro-based dataset generation.
-    tests:
+    data_tests:
       - dbt_utils.equality:
           compare_model: ref("output__joined__query_stream_macro")
 

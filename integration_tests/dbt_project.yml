@@ -35,6 +35,11 @@ vars:
         model_prefix: customer__
 
 
+flags:
+  send_anonymous_usage_stats: False
+  use_colors: True
+
+
 seeds:
   dbt_activity_schema_integration_tests:
     datasets:

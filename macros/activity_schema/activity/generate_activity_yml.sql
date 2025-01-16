@@ -82,7 +82,7 @@
       {% do yaml_output.append('        description: "' ~ column['description'] ~ '"') %}
       {% do yaml_output.append('        data_type: ' ~ column['data_type']) %}
       {% if column['tests'] %}
-        {% do yaml_output.append('        tests:') %}
+        {% do yaml_output.append('        data_tests:') %}
         {% for test in column['tests'] %}
           {% do yaml_output.append('          - ' ~ test) %}
         {% endfor %}
