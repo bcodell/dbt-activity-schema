@@ -80,4 +80,8 @@ seeds:
       column_types:
         first_before_referrer_url: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
         second_pageview_at: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
-        
+
+  - name: output__time_spine
+    config:
+      column_types:
+        ts: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
