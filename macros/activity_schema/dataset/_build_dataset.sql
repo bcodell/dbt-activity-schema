@@ -85,9 +85,9 @@ time_spine_entities as (
         {%- for column in primary_activity.columns %}
         {{ dbt_activity_schema.select_column(stream, primary, column).column_sql }} as {{column.alias}},
         {%- endfor %}
-        date_trunc('{{primary_activity.interval}}', min({{primary}}.{{columns.ts}})) as period_start,
-        {% if primary_activity.end_period=='current' %}current_timestamp{% else %}date_trunc('{{primary_activity.interval}}', max({{primary}}.{{columns.ts}})){% endif %} as period_end,
-        date_diff('{{primary_activity.interval}}', period_start::timestamp, {% if primary_activity.end_period=='current' %}current_timestamp{% else %}date_trunc('{{primary_activity.interval}}', max({{primary}}.{{columns.ts}})){% endif %}::timestamp) as active_periods
+        {{dbt_activity_schema.date_trunc(primary_activity.interval, 'min('~columns.ts~')')}} as period_start,
+        {{dbt_activity_schema.end_period_expression(primary_activity.end_period, columns.ts)}} as period_end,
+        {{dbt_activity_schema.date_diff(primary_activity.interval, dbt_activity_schema.date_trunc(primary_activity.interval, 'min('~columns.ts~')'), dbt_activity_schema.end_period_expression(primary_activity.end_period, columns.ts))}} as active_periods
     from {% if primary_activity.filters is none %}{% if not skip_stream %}{{ stream_relation }}{% else %}{{ ref(primary_activity.model_name) }}{% endif %}{% else %}{{primary_activity_alias}}{{fs}}{% endif %} as {{primary}}
     where true
         {% if not skip_stream %}
@@ -109,34 +109,53 @@ time_spine_metadata as (
     from time_spine_entities
 ),
 number_spine as (
+{% if target.type != 'bigquery' %}
 with recursive number_spine as (
-    select 1 as n -- start the spine at 1
+    select 0 as n -- start the spine at 1
     union all
     select n + 1
     from number_spine
     where n <= (select max_active_periods from time_spine_metadata) -- adjust the upper limit as needed
 )
-select * from number_spine),
-{{primary_activity_alias}} as (
+select * from number_spine
+{% else %}
+select n
+from unnest(generate_array(0, 10000)) as n
+{% endif %}
+),
+joined_time_spine as (
     select
         {%- for column in primary_activity.columns %}
         tse.{{column.alias}},
         {%- endfor %}
-        ns.n-1 as n0,
-        {{ dbt_activity_schema.dateadd(primary_activity.interval, 'n0', 'tse.period_start') }} as {{columns.ts}},
-        {{ dbt_activity_schema.dateadd(primary_activity.interval, 1, columns.ts) }} as {{columns.activity_repeated_at}},
-        ns.n as {{columns.activity_occurrence}},
-        md5(tse.{{req}}{{columns.customer}} || {{columns.ts}}) as {{req}}{{columns.activity_id}},
-        tse.{{req}}{{columns.customer}},
+        ns.n,
+        tse.period_start,
+        {{ dbt_activity_schema.dateadd(primary_activity.interval, 'ns.n', 'tse.period_start') }} as {{columns.ts}},
         {% if columns.anonymous_customer_id is defined %}
         tse.{{req}}{{columns.anonymous_customer_id}},
         {% endif %}
-        {{columns.ts}} as {{req}}{{columns.ts}},
-        {{columns.activity_occurrence}} as {{req}}{{columns.activity_occurrence}},
-        {{columns.activity_repeated_at}} as {{req}}{{columns.activity_repeated_at}}
+        tse.{{req}}{{columns.customer}}
     from time_spine_entities tse
     left join number_spine ns
         on tse.active_periods >= ns.n
+),
+{{primary_activity_alias}} as (
+    select
+        {%- for column in primary_activity.columns %}
+        {{column.alias}},
+        {%- endfor %}
+        {{columns.ts}},
+        {{ dbt_activity_schema.dateadd(primary_activity.interval, 1, columns.ts) }} as {{columns.activity_repeated_at}},
+        n+1 as {{columns.activity_occurrence}},
+        {{dbt_activity_schema.md5(req~columns.customer~' || '~columns.ts)}} as {{req}}{{columns.activity_id}},
+        {{req}}{{columns.customer}},
+        {% if columns.anonymous_customer_id is defined %}
+        {{req}}{{columns.anonymous_customer_id}},
+        {% endif %}
+        {{columns.ts}} as {{req}}{{columns.ts}},
+        n+1 as {{req}}{{columns.activity_occurrence}},
+        {{ dbt_activity_schema.dateadd(primary_activity.interval, 1, columns.ts) }} as {{req}}{{columns.activity_repeated_at}},
+    from joined_time_spine
 )
 {% else %}
 {% if primary_activity.filters is not none %}
