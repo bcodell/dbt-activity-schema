@@ -47,7 +47,17 @@ jobs:
         env:
           GCP_KEYFILE_PATH: ./gcp_keyfile.json
           DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
-
+      - name: dbt CI - bigquery - with stream
+        if: github.repository == 'bcodell/dbt-activity-schema'
+        run: |
+          cd ./integration_tests
+          sed -i 's/skip_stream: true/skip_stream: false/' dbt_project.yml
+          echo $GCP_KEYFILE > $GCP_KEYFILE_PATH
+          ls -l
+          dbt build -x --target bigquery
+        env:
+          GCP_KEYFILE_PATH: ./gcp_keyfile.json
+          DBT_PROFILES_DIR: . # Use integration_tests/profiles.yml
       - name: dbt CI - bigquery - skip stream
         if: github.repository == 'bcodell/dbt-activity-schema'
         run: |
