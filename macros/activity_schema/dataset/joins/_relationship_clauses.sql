@@ -58,12 +58,17 @@ true
 {{alias}}.{{activity_occurrence}} = {{nth}}
 {% endmacro %}
 
+{% macro _relationship_clause_time_spine(verb, join_condition, nth) %}
+
+{% endmacro %}
+
 
 {% macro _relationship_clause_map() %}
 {%- do return(namespace(
     first=dbt_activity_schema._relationship_clause_first,
     last=dbt_activity_schema._relationship_clause_last,
     all=dbt_activity_schema._relationship_clause_all,
-    nth=dbt_activity_schema._relationship_clause_nth
+    nth=dbt_activity_schema._relationship_clause_nth,
+    time_spine=dbt_activity_schema._relationship_clause_time_spine,
 )) -%}
 {% endmacro %}
