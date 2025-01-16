@@ -7,3 +7,9 @@ models:
     tests:
       - dbt_utils.equality:
           compare_model: ref("output__time_spine")
+          compare_columns:
+            - ts
+            - customer_id
+            - total_items_purchased_between
+            - total_sales_between
+            - total_purchases_between
