@@ -11,14 +11,12 @@
 -- Get column descriptions and tests
 {% macro get_column_descriptions(activity) %}
   {% set stream = get_activity_config(activity).stream %}
-  {% set schema_columns = dbt_activity_schema.schema_columns() %}
-  {% set customer_column = dbt_activity_schema.customer_column(stream) %}
-  {% set anonymous_customer_column = dbt_activity_schema.anonymous_customer_column(stream) %}
+  {% set schema_columns = dbt_activity_schema.schema_columns(stream) %}
 
   {% set columns = [
       {'name': 'activity_id', 'description': 'Unique identifier for the activity.', 'data_type': type_string(), 'tests': ['unique', 'not_null']},
-      {'name': 'customer_id', 'description': 'Identifier for the entity.', 'data_type': type_string()},
-      {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string(), 'tests': ['not_null']},
+      {'name': 'customer', 'description': 'Identifier for the entity.', 'data_type': type_string()},
+      {'name': 'anonymous_customer_id', 'description': 'Anonymous identifier for the entity.', 'data_type': type_string()},
       {'name': 'activity', 'description': 'Type of activity performed.', 'data_type': type_string(), 'tests': ['not_null']},
       {'name': 'ts', 'description': 'Timestamp of when the activity occurred.', 'data_type': type_timestamp(), 'tests': ['not_null']},
       {'name': 'revenue_impact', 'description': 'Revenue impact of the activity, if applicable.', 'data_type': type_int()},
@@ -28,8 +26,8 @@
       {'name': 'activity_repeated_at', 'description': 'Timestamp of when the activity was repeated, if applicable.', 'data_type': type_timestamp()}
   ] %}
 
-  -- Remove unused columns
-  {%- if anonymous_customer_column is none -%}
+  -- Remove optional columns (anonymous_customer_id, revenue_impact, link), when these are not used
+  {%- if schema_columns.anonymous_customer_id is not defined -%}
     {%- set columns = columns | rejectattr("name", "equalto", "anonymous_customer_id") | list -%}
   {%- endif -%}
 
@@ -40,7 +38,7 @@
   {%- if schema_columns.revenue_impact is not defined -%}
     {%- set columns = columns | rejectattr("name", "equalto", "revenue_impact") | list -%}
   {%- endif -%}
-
+  
   -- Update column names based on schema_columns
   {% for column in columns %}
     {% if column.name in schema_columns %}
