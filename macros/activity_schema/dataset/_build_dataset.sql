@@ -154,7 +154,7 @@ joined_time_spine as (
         {% endif %}
         {{columns.ts}} as {{req}}{{columns.ts}},
         n+1 as {{req}}{{columns.activity_occurrence}},
-        {{ dbt_activity_schema.dateadd(primary_activity.interval, 1, columns.ts) }} as {{req}}{{columns.activity_repeated_at}},
+        {{ dbt_activity_schema.dateadd(primary_activity.interval, 1, columns.ts) }} as {{req}}{{columns.activity_repeated_at}}
     from joined_time_spine
 )
 {% else %}
