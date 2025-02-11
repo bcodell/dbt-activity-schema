@@ -14,7 +14,7 @@ dbt-postgres = "~1.8"
 dbt-bigquery = "~1.8"
 localstack = "~3.0"
 dbt-snowflake = "~1.8"
-cryptography = "~43.0.1"
+cryptography = "~44.0.1"
 sqlparse = "~0.5.0"
 setuptools = "^75.8.0"
 
