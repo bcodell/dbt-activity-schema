@@ -1,3 +1,5 @@
+**Update: Something new in this space is in development. Check out [daisyhq.com](daisyhq.com) to learn more.**
+
 # **dbt-activity-schema**
 A dbt package to build and maintain Activity Schema data pipelines and build datasets from Activity Streams. Assumes some working knowledge of the [Activity Schema Spec](https://github.com/ActivitySchema/ActivitySchema).
 
