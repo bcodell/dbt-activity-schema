@@ -1,4 +1,4 @@
-**Update: we're extending this project to build Daisy, an event analytics platform designed to help analysts move from ad hoc analysis to actionable business insights faster. Learn more at [https://daisyhq.com]([https://daisyhq.com](https://daisyhq.com/?utm_source=github&utm_medium=readme&utm_content=dbt-activity-schema)).**
+**Update: we're extending this project to build Daisy, an event analytics platform designed to help analysts move from ad hoc analysis to actionable business insights faster. Learn more at [https://daisyhq.com](https://daisyhq.com/?utm_source=github&utm_medium=readme&utm_content=dbt-activity-schema).**
 
 # **dbt-activity-schema**
 A dbt package to build and maintain Activity Schema data pipelines and build datasets from Activity Streams. Assumes some working knowledge of the [Activity Schema Spec](https://github.com/ActivitySchema/ActivitySchema).
