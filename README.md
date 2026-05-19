@@ -53,8 +53,11 @@ This project has been tested and is compatible with the following data warehouse
 * Bigquery
 * Postgres
 * Duckdb (Motherduck not yet tested)
+* SparkSQL (requires Spark 3.3+)
 
 Other warehouses (e.g. Redshift) may work but have not yet been tested.
+
+> **Note for SparkSQL users:** SparkSQL has no native JSON type. The `feature_json` column is stored as `string`. The package handles JSON construction and extraction transparently via `to_json(struct(...))` and `get_json_object(...)`. Additionally, the `::` cast syntax used in some advanced filter examples is not valid in SparkSQL — use `cast(... as ...)` instead. Requires Spark 3.3+ for full date arithmetic support.
 
 
 # **Project Configuration**
@@ -209,6 +212,13 @@ If the Activity Schema being built is configured to skip the activity stream, th
         options={"partition_by": dbt_activity_schema.cluster_keys()}
     )
 }}
+
+-- SparkSQL
+{{
+    config(
+        partition_by=dbt_activity_schema.cluster_keys()
+    )
+}}
 ```
 
 **Note: The `cluster_keys` macro requires the name of the activity's associated stream to be passed as an input argument only when using Bigquery.**
@@ -321,6 +331,12 @@ Example implementations of this configuration for supported warehouses are provi
     )
 }}
 
+-- SparkSQL
+{{
+    config(
+        partition_by=dbt_activity_schema.cluster_keys()
+    )
+}}
 ```
 
 </br></br>
