@@ -109,7 +109,12 @@ time_spine_metadata as (
     from time_spine_entities
 ),
 number_spine as (
-{% if target.type != 'bigquery' %}
+{% if target.type == 'bigquery' %}
+select n
+from unnest(generate_array(0, 10000)) as n
+{% elif target.type == 'spark' %}
+select explode(sequence(0, cast((select max_active_periods from time_spine_metadata) as int))) as n
+{% else %}
 with recursive number_spine as (
     select 0 as n -- start the spine at 1
     union all
@@ -118,9 +123,6 @@ with recursive number_spine as (
     where n <= (select max_active_periods from time_spine_metadata) -- adjust the upper limit as needed
 )
 select * from number_spine
-{% else %}
-select n
-from unnest(generate_array(0, 10000)) as n
 {% endif %}
 ),
 joined_time_spine as (

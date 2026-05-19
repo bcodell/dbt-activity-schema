@@ -109,3 +109,16 @@ passed to the 'cluster_keys' macro in each activity model.
 {%- endif -%}
 {%- do return(cluster_cols|join(", ")) -%}
 {% endmacro %}
+
+
+{% macro spark__cluster_keys(stream=none) %}
+{%- set streams = var("dbt_activity_schema").get("streams", {}).keys() -%}
+{%- set columns = dbt_activity_schema.schema_columns() -%}
+
+{%- if model.name in streams -%}
+{%- set cluster_cols = [columns.activity, columns.ts] -%}
+{%- else -%}
+{%- set cluster_cols = [columns.ts] -%}
+{%- endif -%}
+{%- do return(cluster_cols) -%}
+{% endmacro %}

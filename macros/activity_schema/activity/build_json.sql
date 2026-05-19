@@ -86,3 +86,17 @@
     null::json
     {%- endif -%}
 {%- endmacro -%}
+
+
+{%- macro spark__build_json(data_types) -%}
+    {%- if data_types is not none -%}
+    {%- set features = data_types.keys() -%}
+    to_json(struct(
+        {% for feature in features -%}
+        {{feature}} as {{feature}}{%- if not loop.last -%},{% endif %}
+        {% endfor -%}
+    ))
+    {%- else -%}
+    cast(null as string)
+    {%- endif -%}
+{%- endmacro -%}

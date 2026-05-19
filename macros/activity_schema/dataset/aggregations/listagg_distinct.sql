@@ -17,3 +17,7 @@ nullif(listagg(distinct {{ column.column_sql }}, {{dbt_activity_schema.listagg_d
 {% macro redshift__aggfunc_listagg_distinct(column) %}
 nullif(listagg(distinct {{ column.column_sql }}, {{dbt_activity_schema.listagg_delimiter()}}), '')
 {% endmacro %}
+
+{% macro spark__aggfunc_listagg_distinct(column) %}
+nullif(array_join(sort_array(collect_set({{ column.column_sql }})), {{dbt_activity_schema.listagg_delimiter()}}), '')
+{% endmacro %}
