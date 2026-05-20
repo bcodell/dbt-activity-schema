@@ -138,3 +138,28 @@ md5({{expr}})
 {% macro bigquery__md5(expr) %}
 to_hex(md5({{expr}}))
 {% endmacro %}
+
+
+{% macro spark__type_json() %}
+{%- do return("string") -%}
+{% endmacro %}
+
+{% macro spark__current_timestamp() %}
+current_timestamp()
+{% endmacro %}
+
+{% macro spark__dateadd(interval, periods, ts) %}
+{{ts}} + ({{periods}} * interval 1 {{interval}})
+{% endmacro %}
+
+{% macro spark__to_timestamp(ts) %}
+to_timestamp({{ts}})
+{% endmacro %}
+
+{% macro spark__date_trunc(period, ts) %}
+date_trunc('{{period}}', {{ts}})
+{% endmacro %}
+
+{% macro spark__date_diff(period, start_ts, end_ts) %}
+timestampdiff({{period}}, {{start_ts}}, {{end_ts}})
+{% endmacro %}

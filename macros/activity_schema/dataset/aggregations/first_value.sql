@@ -50,3 +50,17 @@ cast(split(
             {{dbt.string_literal(delimiter)}}
         )[safe_offset(1)] as {{column.data_type}})
 {%- endmacro -%}
+
+{% macro spark__aggfunc_first_value(column) %}
+{%- set joined = dbt_activity_schema.joined() -%}
+{%- set ts = dbt_activity_schema.schema_columns().ts -%}
+{%- set delimiter = ";.,;" -%}
+cast(split(
+            min(
+                cast({{joined}}.{{ts}} as {{dbt.type_string()}})
+                || {{dbt.string_literal(delimiter)}}
+                || cast({{ column.column_sql }} as {{dbt.type_string()}})
+            ),
+            {{dbt.string_literal(delimiter)}}
+        )[1] as {{column.data_type}})
+{%- endmacro -%}

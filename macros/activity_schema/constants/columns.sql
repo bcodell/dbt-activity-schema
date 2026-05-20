@@ -89,7 +89,7 @@ to alias are '{{required_columns.keys()}}'
     columns.activity_repeated_at: dbt.type_timestamp()
 } -%}
 {%- if "revenue_impact" in columns.keys() -%}
-    {%- do column_types.update({columns.revenue_impact: dbt.type_int()}) -%}
+    {%- do column_types.update({columns.revenue_impact: dbt.type_float()}) -%}
 {%- endif -%}
 {%- if "link" in columns.keys()  -%}
     {%- do column_types.update({columns.link: dbt.type_string()}) -%}

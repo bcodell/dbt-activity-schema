@@ -46,5 +46,9 @@ to_varchar(get_path({{json_col}}, '{{key}}'))
 {%- endmacro -%}
 
 {%- macro redshift__json_extract(json_col, key) -%}
-CAST({{json_col}}.{{key}} AS varchar) 
+CAST({{json_col}}.{{key}} AS varchar)
+{%- endmacro -%}
+
+{%- macro spark__json_extract(json_col, key) -%}
+get_json_object({{ json_col }}, '$.{{key}}')
 {%- endmacro -%}
