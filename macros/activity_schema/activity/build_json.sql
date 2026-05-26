@@ -36,7 +36,14 @@
     {%- set features = data_types.keys() -%}
     json_parse('{' ||
         {% for feature in features -%}
-        {% if not loop.first -%}', '|| {%- endif -%}'"{{feature}}": "' || decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})){% if not loop.last %} ||'"'{% endif %}
+        {%- set dtype = data_types[feature] | lower -%}
+        {% if not loop.first -%}', '|| {%- endif -%}'"{{feature}}": "' ||
+        {%- if 'bool' in dtype -%}
+        case when {{feature}} is true then 'true' when {{feature}} is false then 'false' else '' end
+        {%- else -%}
+        replace(replace(decode(cast({{feature}} as {{dbt.type_string()}}), null, '', cast({{feature}} as {{dbt.type_string()}})), '\\', '\\\\'), '"', '\\"')
+        {%- endif -%}
+        {% if not loop.last %} ||'"'{% endif %}
         {% endfor -%}
     || '"}')
     {%- else -%}
