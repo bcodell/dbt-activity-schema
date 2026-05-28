@@ -1,0 +1,7 @@
+version: 2
+
+seeds:
+  - name: redshift_edge_cases_source
+    config:
+      column_types:
+        is_flagged: boolean

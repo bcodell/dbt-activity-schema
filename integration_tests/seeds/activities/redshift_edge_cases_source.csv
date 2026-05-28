@@ -1,0 +1,3 @@
+ts,entity_uuid,text_with_quotes,text_with_backslash,is_flagged
+2022-01-01 00:00:00,1,"say ""hello""",path\to\file,true
+2022-01-02 00:00:00,2,plain text,normal text,false

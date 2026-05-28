@@ -85,3 +85,11 @@ seeds:
     config:
       column_types:
         ts: "{{ 'datetime' if target.name == 'bigquery' else 'timestamp' }}"
+
+  - name: output__redshift_edge_cases
+    config:
+      column_types:
+        customer_id: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
+        text_with_quotes: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
+        text_with_backslash: "{{ 'string' if target.name == 'bigquery' else 'text' }}"
+        is_flagged: "{{ 'string' if target.name == 'bigquery' else 'text' }}"

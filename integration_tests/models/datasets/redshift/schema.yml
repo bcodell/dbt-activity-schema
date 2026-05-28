@@ -1,0 +1,14 @@
+version: 2
+
+# Redshift-only tests. Run with: dbt build --select tag:redshift
+# These models are disabled (config enabled=false) on non-Redshift targets.
+
+models:
+
+  - name: dataset__redshift_edge_cases
+    description: >
+      Validates that build_activity (fixed redshift__build_json) correctly
+      handles text fields containing quotes and backslashes, and boolean fields.
+    data_tests:
+      - dbt_utils.equality:
+          compare_model: ref("output__redshift_edge_cases")
